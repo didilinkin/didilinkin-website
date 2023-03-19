@@ -1,0 +1,98 @@
+---
+sidebar_position: 8
+sidebar_label: 自定义 Hooks
+title: 自定义 Hooks
+description: Hooks 是可重用的函数
+---
+
+Hooks 是可重用的函数
+
+当您有多个组件需要使用的组件逻辑时，我们可以将该逻辑提取到 自定义 Hook 中
+
+自定义 Hooks 以“use”开头。 示例: `useFetch`
+
+## 建立一个 Hook
+
+在下面的代码中，我们在 `Home` 组件中获取数据并显示它
+
+我们将使用 [JSONPlaceholder](https://jsonplaceholder.typicode.com/) 服务来获取假数据。 此服务非常适合在没有现有数据时测试应用程序
+
+要了解更多信息，请查看 [JavaScript Fetch API](https://www.w3schools.com/js/js_api_fetch.asp) 部分
+
+使用 JSONPlaceholder 服务获取虚假的“待办事项”项目并在页面上显示标题：
+
+```jsx live noInline
+const Home = () => {
+  const [data, setData] = useState(null)
+
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/todos")
+      .then((res) => res.json())
+      .then((data) => setData(data))
+  }, [])
+
+  return (
+    <>
+      {data &&
+        data.map((item, index) => {
+          if (index < 5) {
+            return <p key={item.id}>{item.title}</p>
+          }
+        })}
+    </>
+  )
+}
+
+render(<Home />)
+```
+
+其他组件也可能需要获取逻辑，因此我们将其提取到自定义 Hook 中
+
+将获取逻辑移动到一个新文件以用作 自定义 Hook:
+
+```jsx live noInline
+// useFetch.jsx
+const useFetch = (url) => {
+  const [data, setData] = useState(null)
+
+  useEffect(() => {
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => setData(data))
+  }, [url])
+
+  return [data]
+}
+
+// index.jsx
+const Home = () => {
+  const [data] = useFetch("https://jsonplaceholder.typicode.com/todos")
+
+  return (
+    <>
+      {data &&
+        data.map((item, index) => {
+          if (index < 3) {
+            return <p key={item.id}>{item.title}</p>
+          }
+        })}
+    </>
+  )
+}
+
+render(<Home />)
+```
+
+<br />
+
+## 示例说明
+
+我们创建了一个名为 `useFetch.js` 的新文件，其中包含一个名为 `useFetch` 的函数，该函数包含获取数据所需的所有逻辑
+
+我们删除了硬编码的 URL, 并将其替换为可以传递给自定义 Hook 的 `url` 变量
+
+最后，我们从 Hook 返回数据
+
+在 `index.js` 中，我们正在导入我们的 `useFetch` Hook 并像使用任何其他 Hook 一样使用它。 这是我们传入 URL 以从中获取数据的地方
+
+现在我们可以在任何组件中重用这个自定义 Hook 来从任何 URL 获取数据

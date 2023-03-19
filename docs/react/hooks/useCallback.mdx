@@ -1,0 +1,143 @@
+---
+sidebar_position: 6
+sidebar_label: useCallback
+description: React useCallback Hook 返回一个记忆回调函数
+---
+
+React useCallback Hook 返回一个记忆回调函数
+
+:::note
+将记忆化视为缓存一个值，这样它就不需要重新计算
+:::
+
+这使我们能够隔离资源密集型功能，以便它们不会在每次渲染时自动运行
+
+`useCallback` Hook 仅在其依赖项之一更新时运行
+
+这可以提高性能
+
+:::note
+`useCallback` 和 `useMemo` Hooks 是相似的
+
+主要区别在于 `useMemo` 返回一个记忆值，而 `useCallback` 返回一个记忆函数
+
+您可以在 `useMemo` 章节中了解有关 [useMemo 的更多信息](/docs/react/hooks/useMemo)
+:::
+
+<br />
+
+## 问题
+
+使用 `useCallback` 的原因之一是防止组件重新渲染，除非它的 props 已经改变
+
+在此示例中，您可能认为 `Todos` 组件不会重新呈现，除非 `todos` 发生变化：
+
+:::note
+这是与 `React.memo` 部分中的示例类似的示例
+:::
+
+```jsx live noInline
+// Todo.jsx
+const Todos = ({ todos, addTodo }) => {
+  console.log("child render")
+  return (
+    <>
+      <h2>My Todos</h2>
+      {todos.map((todo, index) => {
+        return <p key={index}>{todo}</p>
+      })}
+      <button onClick={addTodo}>Add Todo</button>
+    </>
+  )
+}
+
+const MenoTodos = memo(Todos)
+
+// index.jsx
+const App = () => {
+  const [count, setCount] = useState(0)
+  const [todos, setTodos] = useState([])
+
+  const increment = () => {
+    setCount((c) => c + 1)
+  }
+  const addTodo = () => {
+    setTodos((t) => [...t, "New Todo"])
+  }
+
+  return (
+    <>
+      <MenoTodos todos={todos} addTodo={addTodo} />
+      <hr />
+      <div>
+        Count: {count}
+        <button onClick={increment}>+</button>
+      </div>
+    </>
+  )
+}
+
+render(<App />)
+```
+
+尝试运行它并单击计数增量按钮
+
+你会注意到 `Todos` 组件会重新渲染，即使 `todos` 没有改变
+
+为什么这不起作用？ 我们正在使用 `memo`, 所以 `Todos` 组件不应该重新渲染，因为当计数增加时 `todos` 状态和 `addTodo` 函数都没有改变
+
+这是因为所谓的“参照平等”
+
+每次重新渲染组件时，都会重新创建其功能。 因此, `addTodo` 函数实际上发生了变化
+
+## 解决方案
+
+为了解决这个问题，我们可以使用 `useCallback` 钩子来防止函数被重新创建，除非有必要
+
+使用 `useCallback` Hook 来防止 `Todos` 组件不必要地重新渲染：
+
+```jsx live noInline
+// Todo.jsx
+const Todos = ({ todos, addTodo }) => {
+  console.log("child render")
+  return (
+    <>
+      <h2>My Todos</h2>
+      {todos.map((todo, index) => {
+        return <p key={index}>{todo}</p>
+      })}
+      <button onClick={addTodo}>Add Todo</button>
+    </>
+  )
+}
+
+const MemoTodos = memo(Todos)
+
+// index.jsx
+const App = () => {
+  const [count, setCount] = useState(0)
+  const [todos, setTodos] = useState([])
+
+  const increment = () => {
+    setCount((c) => c + 1)
+  }
+  const addTodo = useCallback(() => {
+    setTodos((t) => [...t, "New Todo"])
+  }, [todos])
+
+  return (
+    <>
+      <MemoTodos todos={todos} addTodo={addTodo} />
+      <hr />
+      <div>
+        Count: {count}
+        <button onClick={increment}>+</button>
+      </div>
+    </>
+  )
+}
+
+render(<App />)
+```
+
+现在 `Todos` 组件只会在 `todos` 属性改变时重新渲染

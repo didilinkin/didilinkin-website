@@ -1,0 +1,133 @@
+---
+sidebar_position: 7
+sidebar_label: useMemo
+description: React useMemo Hook 返回一个记忆值
+---
+
+React useMemo Hook 返回一个记忆值
+
+:::note
+将记忆化视为缓存一个值，以便不需要重新计算它
+:::
+
+`useMemo` Hook 仅在其依赖项之一更新时运行
+
+这可以提高性能
+
+:::note
+`useMemo` 和 `useCallback` Hooks 是相似的
+
+主要区别在于 `useMemo` 返回一个记忆值，而 `useCallback` 返回一个记忆函数
+
+您可以在 `useCallback` 章节中了解有关 [useCallback 的更多信息](/docs/react/hooks/useCallback)
+:::
+
+## 性能
+
+`useMemo` Hook 可用于防止不必要地运行昂贵的资源密集型功能
+
+在这个例子中，我们有一个在每个渲染器上运行的昂贵函数
+
+更改计数或添加待办事项时，您会注意到执行延迟
+
+```jsx live noInline
+// 性能不佳的功能。 expensiveCalculation 函数在每次渲染时运行:
+const App = () => {
+  const [count, setCount] = useState(0)
+  const [todos, setTodos] = useState([])
+  const calculation = expensiveCalculation(count)
+
+  const increment = () => {
+    setCount((c) => c + 1)
+  }
+  const addTodo = () => {
+    setTodos((t) => [...t, "New Todo"])
+  }
+
+  return (
+    <div>
+      <div>
+        <h2>My Todos</h2>
+        {todos.map((todo, index) => {
+          return <p key={index}>{todo}</p>
+        })}
+        <button onClick={addTodo}>Add Todo</button>
+      </div>
+      <hr />
+      <div>
+        Count: {count}
+        <button onClick={increment}>+</button>
+        <h2>昂贵的计算</h2>
+        {calculation}
+      </div>
+    </div>
+  )
+}
+
+const expensiveCalculation = (num) => {
+  console.log("Calculating...")
+  for (let i = 0; i < 1000000000; i++) {
+    num += 1
+  }
+  return num
+}
+
+render(<App />)
+```
+
+<br />
+
+## 使用 useMemo
+
+为了解决这个性能问题，我们可以使用 `useMemo` Hook 来记忆 `expensiveCalculation` 函数。 这将导致函数仅在需要时运行
+
+我们可以用 `useMemo` 包装昂贵的函数调用
+
+useMemo Hook 接受第二个参数来声明依赖关系。 昂贵的功能只会在其依赖项发生变化时运行
+
+在下面的示例中，昂贵的函数只会在 `count` 更改时运行，而不是在添加待办事项时运行
+
+```jsx live noInline
+// 使用 useMemo Hook 的性能示例:
+const App = () => {
+  const [count, setCount] = useState(0)
+  const [todos, setTodos] = useState([])
+  const calculation = useMemo(() => expensiveCalculation(count), [count])
+
+  const increment = () => {
+    setCount((c) => c + 1)
+  }
+  const addTodo = () => {
+    setTodos((t) => [...t, "New Todo"])
+  }
+
+  return (
+    <div>
+      <div>
+        <h2>My Todos</h2>
+        {todos.map((todo, index) => {
+          return <p key={index}>{todo}</p>
+        })}
+        <button onClick={addTodo}>Add Todo</button>
+      </div>
+      <hr />
+      <div>
+        Count: {count}
+        <button onClick={increment}>+</button>
+        <h2>昂贵的计算</h2>
+        {calculation}
+      </div>
+    </div>
+  )
+}
+
+const expensiveCalculation = (num) => {
+  console.log("Calculating...")
+  for (let i = 0; i < 1000000000; i++) {
+    num += 1
+  }
+  return num
+}
+
+render(<App />)
+```

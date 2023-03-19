@@ -1,0 +1,117 @@
+---
+sidebar_position: 4
+sidebar_label: useRef
+description: useRef Hook 允许你在渲染之间保留值
+---
+
+`useRef` Hook 允许您在渲染之间保留值
+
+它可用于存储在更新时不会导致重新渲染的可变值
+
+它可用于直接访问 DOM 元素
+
+## 不会导致重新渲染
+
+如果我们试图计算我们的应用程序使用 `useState` Hook 渲染了多少次，我们就会陷入无限循环，因为这个 Hook 本身会导致重新渲染
+
+为了避免这种情况，我们可以使用 `useRef` Hook
+
+```jsx live noInline
+// 使用 useRef 跟踪应用程序渲染
+function App() {
+  const [inputValue, setInputValue] = useState("")
+  const count = useRef(0)
+  useEffect(() => {
+    count.current = count.current + 1
+  })
+  return (
+    <>
+      <input
+        type="text"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+      />
+      <h1>Render Count: {count.current}</h1>
+    </>
+  )
+}
+
+render(<App />)
+```
+
+`useRef()` 只返回一项。 它返回一个名为 `current` 的对象
+
+当我们初始化 `useRef` 时, 我们设置初始值: `useRef(0)`
+
+:::tip
+就像这样做: `const count = { current: 0 }`
+
+我们可以使用 `count` 访问 `count.current`
+:::
+在您的计算机上运行此程序并尝试输入内容以查看应用程序渲染计数的增加
+
+<br />
+
+## 访问 DOM 元素
+
+一般来说，我们想让 React 处理所有的 DOM 操作
+
+但在某些情况下，可以使用 `useRef` 而不会引起问题
+
+在 React 中，我们可以为元素添加一个 `ref` 属性，以便直接在 DOM 中访问它
+
+```jsx live noInline
+// 使用 useRef 聚焦输入:
+function App() {
+  const inputElement = useRef()
+  const focusInput = () => {
+    inputElement.current.focus()
+  }
+  return (
+    <>
+      <input type="text" ref={inputElement} />
+      <button onClick={focusInput}>Focus Input</button>
+    </>
+  )
+}
+
+render(<App />)
+```
+
+<br />
+
+## 跟踪状态变化
+
+`useRef` Hook 也可用于跟踪以前的状态值
+
+这是因为我们能够在渲染之间保留 `useRef` 值
+
+```jsx live noInline
+// 使用 useRef 来跟踪以前的状态值:
+function App() {
+  const [inputValue, setInputValue] = useState("")
+  const previousInputValue = useRef("")
+
+  useEffect(() => {
+    previousInputValue.current = inputValue
+  }, [inputValue])
+
+  return (
+    <>
+      <input
+        type="text"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+      />
+      <h2>Current Value: {inputValue}</h2>
+      <h2>Previous Value: {previousInputValue.current}</h2>
+    </>
+  )
+}
+
+render(<App />)
+```
+
+这次我们结合使用 `useState`, `useEffect` 和 `useRef` 来跟踪之前的状态
+
+在 `useEffect` 中，每次通过在输入字段中输入文本来更新 `inputValue` 时，我们都会更新 `useRef` 当前值

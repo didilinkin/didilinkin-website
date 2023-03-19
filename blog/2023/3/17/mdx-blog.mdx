@@ -1,0 +1,90 @@
+---
+slug: mdx-blog
+title: 使用 MDX编写博客
+authors: [didilinkin]
+tags: [init, mdx]
+---
+
+import Tabs from "@theme/Tabs"
+import TabItem from "@theme/TabItem"
+
+## 代码块
+
+```jsx live
+// demo.tsx
+<button class="uk-button uk-button-primary">Button</button>
+```
+
+<br />
+
+<!--truncate-->
+
+## 多语言语法支持
+
+<Tabs>
+<TabItem value="js" label="JavaScript">
+
+```js
+function helloWorld() {
+  console.log("Hello, world!")
+}
+```
+
+</TabItem>
+
+<TabItem value="py" label="Python">
+
+```py
+def hello_world():
+    print("Hello, world!")
+```
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+```java
+class HelloWorld {
+    public static void main(String args[]) {
+        System.out.println("Hello, World");
+    }
+}
+```
+
+</TabItem>
+<TabItem value="solidity" label="Solidity">
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.8.0;
+
+contract HotFudgeSauce {
+    uint public qtyCups;
+
+    // Get the current hot fudge quantity
+    function get() public view returns (uint) {
+        return qtyCups;
+    }
+
+    // Increment hot fudge quantity by 1
+    function increment() public {
+        qtyCups += 1; // same as  qtyCups = qtyCups + 1;
+    }
+
+    // Function to decrement count by 1
+    function decrement() public {
+        qtyCups -= 1; // same as  qtyCups = qtyCups - 1;
+        // What happens if qtyCups = 0 when this func is called?
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+<br />
+
+## npm2yarn2pnpm 自动标签
+
+```bash npm2yarn2pnpm
+npm install @docusaurus/remark-plugin-npm2yarn
+```

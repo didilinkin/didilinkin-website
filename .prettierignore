@@ -1,0 +1,8 @@
+# 忽略文件夹:
+build
+coverage
+
+# 忽略某一类型文件:
+*.html
+*.md
+*.mdx

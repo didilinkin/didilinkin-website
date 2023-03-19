@@ -1,0 +1,60 @@
+---
+sidebar_position: 3
+sidebar_label: ES 2017
+description: ECMAScript 2017
+title: ECMAScript 2017
+---
+<!-- http://blog.ycqupup.com/archives/es8%E6%96%B0%E7%89%B9%E6%80%A7 -->
+### async/await
+
+提供了 `async` 和 `await` 语法，可以用来更简便的编写异步代码
+
+<br />
+
+### 函数最后一个参数尾部支持逗号
+
+提议完全是关于语法的，对语义没有任何改变。主要解决当我们添加函数的参数时，版本控制系统导致两行更新
+
+```js
+function  clownPuppiesEverywhere (
+  param1,
+  param2,  // 添加的下一个参数只需添加新行，不要修改此行
+)  {  /* ... */  }
+
+clownPuppiesEverywhere (
+  'foo',
+  'bar',  // 添加的下一个参数只需要添加一个新行，而不是修改这一行
+) ;
+```
+
+<br />
+
+### Obiect.getOwnPropertyDescriptors
+
+<br />
+
+### String.prototype.(padStart padEnd}
+
+<br />
+
+### Obiect.values/Obiect entries
+
+`Object.values` 是一个与 `Object.keys` 类似的新函数，但返回的是 Object 自身属性的所有值，不包括继承的值
+
+```js
+const obj = { a: 1, b: 2, c: 3 }
+
+console.log(Object.keys(obj).map((key) => obj[key])) // 输出 [1, 2, 3]
+
+console.log(Object.values(obj)) // 输出 [1, 2, 3]
+```
+
+`Object.entries` 方法返回一个给定对象自身可枚举属性的键值对的数组。
+
+`Object.entries` 看起来是 `Object.keys` 和 `Object.values` 的结合
+
+```js
+const obj = { a: 1, b: 2, c: 3 }
+
+console.log(Object.entries(obj)) // 输出：[["a",1],["b",2],["c",3]]
+```

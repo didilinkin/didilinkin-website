@@ -1,0 +1,52 @@
+---
+sidebar_position: 2
+sidebar_label: ES 2016
+description: ECMAScript 2016
+title: ECMAScript 2016
+---
+
+### JavaScript 指数运算 (\*\*) 和 指数运算符 (\*\*=)
+
+在 ES7 中引入了指数运算符，具有与 `Math.pow(..)`等效的计算结果
+
+a \*\* b 指数运算符，它与 `Math.pow(a, b)`相同
+
+```js
+// x ** y
+
+let squared = 2 ** 2
+// same as: 2 * 2
+
+let cubed = 2 ** 3
+// same as: 2 * 2 * 2
+```
+
+<br />
+
+### JavaScript Array includes()
+
+`includes()` 函数用来判断一个数组是否包含一个指定的值
+
+数组 `includes()`方法，用来判断一个数组是否包含一个指定的值，根据情况，如果包含则返回 true, 否则返回 false
+
+```js
+if (arr.indexOf(el) !== -1) {
+  ...
+}
+// 等价于
+if (arr.includes(el)) {
+  ...
+}
+
+// 如何比较？use SameValueZero
+assert([1, 2, 3].includes(2) === true);
+assert([1, 2, 3].includes(4) === false);
+
+assert([1, 2, NaN].includes(NaN) === true);  // 证明不是通过 == 或者 ===
+
+assert([1, 2, -0].includes(+0) === true); // 证明不是通过Object.is() SameValue
+assert([1, 2, +0].includes(-0) === true);
+
+assert(["a", "b", "c"].includes("a") === true);
+assert(["a", "b", "c"].includes("a", 1) === false);
+```
