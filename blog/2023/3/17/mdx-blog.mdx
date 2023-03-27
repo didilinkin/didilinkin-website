@@ -4,6 +4,7 @@ title: 使用 MDX编写博客
 authors: [didilinkin]
 tags: [init, mdx]
 ---
+<!-- sweetalert2: https://sweetalert2.github.io/#examples -->
 
 import Tabs from "@theme/Tabs"
 import TabItem from "@theme/TabItem"
@@ -12,7 +13,12 @@ import TabItem from "@theme/TabItem"
 
 ```jsx live
 // demo.tsx
-<button class="uk-button uk-button-primary">Button</button>
+<button
+  className="uk-button uk-button-primary"
+  onClick={() => Swal.fire('Good job!', '', 'success')}
+>
+  Button
+</button>
 ```
 
 <br />

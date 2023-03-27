@@ -6,3 +6,7 @@ coverage
 *.html
 *.md
 *.mdx
+
+# 忽略 插件
+*.min.css
+*.min.js

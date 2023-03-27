@@ -1,0 +1,457 @@
+---
+sidebar_position: 7
+sidebar_label: ES 2020
+description: ECMAScript 2020
+title: ECMAScript 2020 新特性
+---
+<!-- http://blog.ycqupup.com/archives/es10%E6%96%B0%E7%89%B9%E6%80%A7 -->
+<!-- https://juejin.cn/post/6844904163285925902 -->
+
+## 1. String.prototype.matchAll() 匹配所有项
+
+如果你想要查找字符串中所有正则表达式的匹配项和它们的位置, `MatchAll` 非常有用
+
+```js
+const regex = /\b(apple)+\b/;
+const fruits = "pear, apple, banana, apple, orange, apple";
+
+for (const match of fruits.match(regex)) {
+  console.log(match);
+}
+// 输出
+//
+// 'apple'
+// 'apple'
+```
+
+相比之下, `matchAll` 返回更多的信息，包括找到匹配项的索引:
+
+```js
+for (const match of fruits.matchAll(regex)) {
+  console.log(match);
+}
+
+// 输出
+//
+// [
+//   'apple',
+//   'apple',
+//   index: 6,
+//   input: 'pear, apple, banana, apple, orange, apple',
+//   groups: undefined
+// ],
+// [
+//   'apple',
+//   'apple',
+//   index: 21,
+//   input: 'pear, apple, banana, apple, orange, apple',
+//   groups: undefined
+// ],
+// [
+//   'apple',
+//   'apple',
+//   index: 36,
+//   input: 'pear, apple, banana, apple, orange, apple',
+//   groups: undefined
+// ]
+```
+
+---
+
+`matchAll()` 方法返回一个包含所有匹配正则表达式及分组捕获结果的迭代器
+
+在 `matchAll` 出现之前, 通过在循环中调用 `regexp.exec` 来获取所有匹配项信息 (regexp需使用/g标志)
+
+```js
+const regexp = RegExp('foo*','g');
+const str = 'table football, foosball';
+
+while ((matches = regexp.exec(str)) !== null) {
+  console.log(`Found ${matches[0]}. Next starts at ${regexp.lastIndex}.`);
+  // expected output: "Found foo. Next starts at 9."
+  // expected output: "Found foo. Next starts at 19."
+}
+```
+
+如果使用 `matchAll`, 就可以不必使用 `while` 循环加 `exec` 方式 (且正则表达式需使用／g标志)
+
+使用 `matchAll` 会得到一个迭代器的返回值, 配合 `for...of`, `array spread` or `Array.from()` 可以更方便实现功能
+
+```js
+const regexp = RegExp('foo*','g');
+const str = 'table football, foosball';
+let matches = str.matchAll(regexp);
+
+for (const match of matches) {
+  console.log(match);
+}
+// Array [ "foo" ]
+// Array [ "foo" ]
+
+// matches iterator is exhausted after the for..of iteration
+// Call matchAll again to create a new iterator
+matches = str.matchAll(regexp);
+
+Array.from(matches, m => m[0]);
+// Array [ "foo", "foo" ]
+```
+
+`matchAll` 可以更好的用于分组
+
+```js
+var regexp = /t(e)(st(\d?))/g;
+var str = 'test1test2';
+
+str.match(regexp);
+// Array ['test1', 'test2']
+```
+
+```js
+let array = [...str.matchAll(regexp)];
+
+array[0];
+// ['test1', 'e', 'st1', '1', index: 0, input: 'test1test2', length: 4]
+array[1];
+// ['test2', 'e', 'st2', '2', index: 5, input: 'test1test2', length: 4]
+```
+
+<br />
+
+## 2. Dynamic Import 动态引入
+
+提供了能在运行时动态加载模块
+
+你也许在 webpack 的模块绑定中已经使用过动态引入。但对于该特性的原生支持已经到来
+
+```js
+// Alert.js
+export default {
+  show() {
+    // 代码
+  }
+}
+
+
+// 使用 Alert.js 的文件
+import('/components/Alert.js')
+  .then(Alert => {
+    Alert.show()
+  })
+```
+
+考虑到许多应用程序使用诸如 webpack 之类的模块打包器来进行代码的转译和优化，这个特性现在还没什么大作用
+
+---
+
+`import()` 返回一个 `Promise` 为所请求模块的模块命名空间对象，该对象是在 获取、实例化 和 评估所有模块的依赖项以及模块本身之后创建的
+
+```js
+// test.js
+
+export const a = function() {}
+
+
+// index.js
+// 运行时，异步获取模块
+let prefix = 'test'
+import(`${prefix}.js`).then(data=>{
+  console.log(data); // Module{a:fungiotn(){}}
+})
+
+// 这里会编译失败，如果是静态的路径，import()会做一些简单的检查
+import(`no.js`).then(data=>{
+  console.log(data);
+}, err => {
+  console.log(err); // Error: Cannot find module 'no.js'
+})
+
+// 这里编译成功，但是err会打印异常
+prefix = 'no'
+import(`${prefix}.js`).then(data=>{
+  console.log(data);
+}, err => {
+  console.log(err); // Error: Cannot find module 'no.js'
+})
+```
+
+和 `import` 相比:
+
+* `import()` 不仅仅能在模块中使用, 还能在 `script` 中使用
+
+* 如果 `import` 在模块中使用, 它可以作为异步操作在代码中任意地方调用, 并且不会被提升
+
+* `import()` 接受任意字符串 (可以是字符串模板，可以在运行时确定模板内容), 而不仅仅是静态字符串
+
+* 模块中 `import()` 的存在不会建立必须在评估包含模块之前获取和评估的依赖关系
+
+* `import()` 不建立可以静态分析的依赖关系 (但是, 可能会在一些的情况下执行推测性获取, 例如 `import("./test.js")`)
+
+<br />
+
+## 3. BigInt
+
+新增了一种基本数据类型 `BigInt`,一共有七种基本数据类型，分别是： String、Number、Boolean、Null、Undefined、Symbol、BigInt
+
+`BigInt` 提供了一种表示大于 2 ^53的整数的方法，这是 Javascript 可以用 `Number` 原语可靠表示的最大数字
+
+```js
+const x = Number.MAX_SAFE_INTEGER;
+// ↪ 9007199254740991, this is 1 less than 2^53
+
+const y = x + 1;
+// ↪ 9007199254740992, ok, checks out
+
+const z = x + 2
+// ↪ 9007199254740992  出错了！
+```
+
+`BigInt` 是通过附加 `n` 到整数的末尾或调用构造函数来创建的
+
+```js
+// 通过附件n到整数末尾创建
+const theBiggestInt = 9007199254740991n;
+// 通过调用构造函数创建
+const alsoHuge = BigInt(9007199254740991);
+// ↪ 9007199254740991n
+
+const hugeButString = BigInt('9007199254740991');
+// ↪ 9007199254740991n`
+```
+
+JavaScript 中能够精确表达的最大数字是 `2^53 - 1`
+
+而 `BigInt` 可以用来创建更大的数字
+
+```js
+const theBiggerNumber = 9007199254740991n
+const evenBiggerNumber = BigInt(9007199254740991)
+```
+
+
+
+<br />
+
+## 4. Promise.allSettled()
+
+当我们处理多个Promise时, 特别是当它们相互依赖时, 记录每个 `Promise` 所发生的事情来调试错误是很有必要的
+
+通过 `Promise.allSettled`, 我们可以创建一个新的Promise, 它只在所有传递给它的 `Promise` 都完成时返回一个数组, 其中包含每个 `Promise` 的数据
+
+```js
+const p1 = new Promise((res, rej) => setTimeout(res, 1000));
+
+const p2 = new Promise((res, rej) => setTimeout(rej, 1000));
+
+Promise.allSettled([p1, p2]).then(data => console.log(data));
+
+// [
+//   Object { status: "fulfilled", value: undefined},
+//   Object { status: "rejected", reason: undefined}
+// ]
+```
+
+区别于Promise.all方法, `Promise.all`是当多个promise全部成功, 或出现第一个失败就会结束
+
+`Promise.allSettled` 是所有都执行完成，无论成功失败
+
+---
+等待多个 `Promise` 返回结果时，我们可以用 `Promise.all([promise_1, promise_2])`
+
+但问题是，如果其中一个请求失败了，就会抛出错误
+
+然而，有时候我们希望某个请求失败后，其他请求的结果能够正常返回
+
+针对这种情况 ES11 引入了 `Promise.allSettled`
+
+```js
+promise_1 = Promise.resolve('hello')
+promise_2 = new Promise((resolve, reject) => setTimeout(reject, 200, 'problem'))
+
+Promise.allSettled([promise_1, promise_2])
+    .then(([promise_1_result, promise_2_result]) => {
+        console.log(promise_1_result) // 输出：{status: 'fulfilled', value: 'hello'}
+        console.log(promise_2_result) // 输出：{status: 'rejected', reason: 'problem'}
+    })
+```
+
+成功的 promise 将返回一个包含 `status` 和 `value` 的对象，失败的 promise 将返回一个包含 `status` 和 `reason` 的对象
+
+<br />
+
+## 5. globalThis
+
+全局属性 `globalThis` 包含全局的 `this` 值，类似于全局对象, `globalThis` 是一个标准的获取全局对象的方式
+
+JavaScript 可以在不同环境中运行，比如浏览器或者 Node.js
+
+浏览器中可用的全局对象是变量 `window`, 但在 Node.js 中是一个叫做 `global` 的对象
+
+为了在不同环境中都使用统一的全局对象，引入了 `globalThis`
+
+```js
+// 浏览器
+window == globalThis // true
+
+// node.js
+global == globalThis // true
+```
+
+<br />
+
+## 6. Optional Chaining 可选链
+
+大部分开发者都遇到过这个问题:
+
+```bash
+TypeError: Cannot read property "x" of undefined
+```
+
+这个错误表示我们正在访问一个不属于对象的属性
+
+`optional chaining` 给我们提供了更加简洁的写法:
+
+```js
+obj?.a
+
+等价于
+
+obj == null ? undefined : obj.a
+```
+
+基本用法
+
+如果运算符左侧的操作数/表达式求值为 `undefined` 或 `null`, 则表达式的返回 `undefined`
+
+否则, 将正常触发目标属性访问, 方法或函数调用
+
+```js title="a?.b"
+a?.b                         // 如果a的值为null或者undefined，返回undefined，否则正常调用a.b
+等价于
+a == null ? undefined : a.b
+```
+
+```js title="a?.[b]"
+a?.[x]                        // 如果a的值为null或者undefined，返回undefined，否则正常调用a[x]
+等价于
+a == null ? undefined : a[x]
+```
+
+```js title="a?.b()"
+a?.b()                        // 如果a的值为null或者undefined,返回undefined
+等价于                         // 如果a.b不是一个函数，抛出TypeError
+a == null ? undefined : a.b() // 否则，正常调用a.b()
+```
+
+```js title="a?.()"
+a?.()                         // 如果a的值为null或者undefined,返回undefined
+等价于                         // 如果a不是undefined或者null,a也不是一个函数，返回一个TypeError
+a == null ? undefined : a()   // 否则，正常调用a()
+```
+
+:::tip
+`?.` 运算符后面不要跟10进制数字 (需要向下兼容), `obj?.3:0` 会被解析为 `obj ? 0.3 : 0`
+:::
+
+### 6.1 访问对象的属性
+
+```js
+const flower = {
+    colors: {
+        red: true
+    }
+}
+
+console.log(flower.colors.red) // 正常运行
+console.log(flower.species.lily) // 抛出错误：TypeError: Cannot read property 'lily' of undefined
+```
+
+在这种情况下, JavaScript 引擎会像这样抛出错误。但是某些情况下值是否存在并不重要，因为我们知道它会存在。于是，可选链式调用就派上用场了！
+
+我们可以使用由一个问号和一个点组成的可选链式操作符，去表示不应该引发错误。如果没有值，应该返回 `undefined`
+
+```js
+console.log(flower.species?.lily) // 输出 undefined
+```
+
+当访问数组或调用函数时，也可以使用可选链式调用
+
+### 6.2 访问数组
+
+```js
+let flowers =  ['lily', 'daisy', 'rose']
+
+console.log(flowers[1]) // 输出：daisy
+
+flowers = null
+
+console.log(flowers[1]) // 抛出错误：TypeError: Cannot read property '1' of null
+console.log(flowers?.[1]) // 输出：undefined
+```
+
+### 6.3 调用函数
+
+```js
+let plantFlowers = () => {
+  return 'orchids'
+}
+
+console.log(plantFlowers()) // 输出：orchids
+
+plantFlowers = null
+
+console.log(plantFlowers()) // 抛出错误：TypeError: plantFlowers is not a function
+
+console.log(plantFlowers?.()) // 输出：undefined
+```
+<br />
+
+## 7. 空值合并运算符
+
+目前，要为变量提供回退值，逻辑操作符 `|| ` 还是必须的
+
+它适用于很多情况，但不能应用在一些特殊的场景
+
+例如，初始值是布尔值或数字的情况
+
+举例说明，我们要把数字赋值给一个变量，当变量的初始值不是数字时，就默认其为 7 :
+
+```js
+let number = 1
+let myNumber = number || 7
+```
+
+变量 `myNumber` 等于 1, 因为左边的 (`number`) 是一个 真 值 `1`
+
+但是, 当变量 `number` 不是 1 而是 0 呢？
+
+```js
+let number = 0
+let myNumber = number || 7
+```
+
+0 是 `假` 值，所以即使 0 是数字
+
+变量 `myNumber` 将会被赋值为右边的 7。但结果并不是我们想要的
+
+幸好, 由两个问号组成: `??` 的合并操作符就可以检查变量 `number` 是否是一个数字，而不用写额外的代码了
+
+```js
+let number = 0
+let myNumber = number ?? 7
+```
+
+操作符右边的值仅在左边的值等于 `null` 或 `undefined` 时有效，因此，例子中的变量 `myNumber` 现在的值等于 0 了
+
+<br />
+
+## 8. import.meta
+
+`import.meta`是一个给JavaScript模块暴露特定上下文的元数据属性的对象
+
+它包含了这个模块的信息, 比如说这个模块的URL :
+
+```js
+// 通过import.meta 获取当前模块信息
+<script type="module" src="my-module.mjs"></script>
+console.log(import.meta); // { url: "file:///home/user/my-module.mjs" }
+```

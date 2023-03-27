@@ -1,0 +1,291 @@
+---
+sidebar_position: 6
+sidebar_label: ES 2019
+description: ECMAScript 2019
+title: ECMAScript 2019 新特性
+---
+<!-- http://blog.ycqupup.com/archives/es10%E6%96%B0%E7%89%B9%E6%80%A7 -->
+<!-- https://xie.infoq.cn/article/4726d6a9256bc474b63022a40 -->
+<!-- https://cloud.tencent.com/developer/article/1822524 -->
+
+## 1. 可忽略的 catch 参数
+
+对 `try-catch` 语法进行改进, 当我们不想使用 `catch` 时可以省略绑定:
+
+```js
+try {
+  // ...
+} catch {
+  // 无需再绑定：catch(error) {}
+}
+```
+
+<br />
+
+## 2. JSON 被归为 ECMAScript 的子集
+
+扩展ECMAScript的JSON让其符合JSON规范
+
+在之前, JSON不是ECMAScript的子集, 从而导致有些可以在JSON中包含的字符, 不能够在ECMAScript的字面量中出现, 比如 U+2028 和 U+2029:
+
+```js
+const sourceCode = '"\u2028"';
+eval(sourceCode); // SyntaxError
+
+JSON.parse(json); // OK
+```
+
+这次改变之后, 我们在编码的时候就不需要再去区分是 JSON 还是 ECMAScript 了
+
+<br />
+
+## 3. 更友好的 JSON.stringify()
+
+JSON 是一个很方便的数据传输格式，它不像 XML 那么复杂，优点就是体积小，便于传输
+
+根据 RFC3629 的规范，在公共环境中传输 JSON, 必须使用 UTF-8 进行编码
+
+在 ES10 中, `JSON.stringify()` 对于这些不可转换成 UTF-8 的字符，直接返回对应的 代码单元转义序列
+
+```js
+console.log(JSON.stringify('\u{D800}'));
+"\ud800"
+```
+
+---
+
+如果输入 Unicode 格式但是超出范围的字符, 原先的JSON.stringify返回格式错误的Unicode字符串
+
+现在实现了一个改变JSON.stringify的第3阶段提案, 因此它为其输出转义序列, 使其成为有效Unicode (并以UTF-8表示)
+
+```js
+// Non-BMP characters still serialize to surrogate pairs.
+JSON.stringify('𝌆')
+// → '"𝌆"'
+JSON.stringify('\uD834\uDF06')
+// → '"𝌆"'
+
+// 未配对的代码符将转换为序列化的转义序列
+JSON.stringify('\uDF06\uD834')
+// → '"\\udf06\\ud834"'
+JSON.stringify('\uDEAD')
+// → '"\\udead"'
+```
+
+<br />
+
+## 4. Function.prototype.toString 修订
+
+在 ES10 中，如果 Function 可以通过以 ECMAScript 源代码的方式表示的话，则 `toString()` 会直接返回这个函数的代码:
+
+```js
+class C {
+  foo() {
+    /*hello*/
+  }
+}
+
+C.prototype.foo.toString()
+
+// ->> 'foo() {/* hello */}'
+```
+
+如果是一些 native 的方法，比如底层 c 或者 c++实现的代码，则直接返回 `[native code]`
+
+```js
+Math.pow.toString()
+
+// ->> 'function pow() { [native code] }'
+```
+<br />
+
+## 5. Object 的新方法 fromEntries
+
+`Object.fromEntries()` 的主要作用就是通过给定的 `[key,value]` ，来创建新的 Object 对象
+
+```js
+var newObj =  Object.fromEntries([['foo',1], ['bar',2]]);
+console.log(newObj);
+{ foo: 1, bar: 2 }
+```
+
+上面例子中，我们通过给定的两个 key-value 对，创建了新的 object 对象
+
+和 `fromEntries` 相反的方法，就是 `Object.entries`,用来遍历对象属性
+
+还是刚刚的例子，我们再调用一下 `Object.entries` 方法:
+
+```js
+console.log(Object.entries(newObj));
+// ->> [ [ 'foo', 1 ], [ 'bar', 2 ] ]
+```
+
+
+
+<br />
+
+## 6. 可访问的 Symbol 的 description 属性
+
+通过工厂函数 `Symbol()` 创建符号时，您可以选择通过参数提供字符串作为描述:
+
+```js
+const sym = Symbol('The description');
+```
+
+以前，访问描述的唯一方法是将符号转换为字符串:
+
+```js
+assert.equal(String(sym), 'Symbol(The description)');
+```
+
+现在引入了getter Symbol.prototype.description以直接访问描述:
+
+```js
+assert.equal(sym.description, 'The description');
+```
+
+:::info
+我们在创建 Symbol 的时候，可以传入一个 `description` 作为参数来构建 Symbol:
+
+```js
+const sym = Symbol('www.flydean.com');
+```
+
+在 ES10 之前，我们想要访问 Symbol 的 `description` 是这样做的:
+
+```js
+console.log(String(sym));
+// ->> Symbol(www.flydean.com)
+```
+
+现在我们可以直接通过 `description` 属性来访问了:
+
+```js
+console.log(sym.description);
+// ->> www.flydean.com
+```
+:::
+<br />
+
+## 7. String 的新方法 trimStart 和 trimEnd
+
+JS 中已经有了 `trim` 的方法，可以消除 String 前后的空格
+
+```js
+console.log(
+  '  abc  '.trim()
+)
+
+// ->> 'abc'
+```
+
+但有时候可能需要消除前面或者后面的空格, ES10 引入了 `trimStart` 和 `trimEnd` 方法:
+
+```js
+'  abc  '.trimStart()
+// ->> 'abc  '
+'  abc  '.trimEnd()
+// ->> '  abc'
+```
+
+:::tip
+注意，有些浏览器可能已经有了 `trimLeft` 和 `trimRight` 方法
+
+在 EMCAScript 规范中，他们和 `trimStart`, `trimEnd` 是等价的
+:::
+
+
+<br />
+
+## 8. Array 的新方法 flat 和 flatMap
+
+在 ES10 中，给 Array 引入了两个新的方法，分别是 `flat` 和 `flatMap`
+
+### 8.1 flat
+我们看一下 `Array<T>.prototype.flat()` 的定义:
+
+```js
+.flat(depth = 1): any[]
+```
+
+`flat` 的作用是将 Array 中的 Array 中的内容取出来，放到最顶层 Array 中
+
+我们可以传入一个 `depth` 参数，表示的是需要 `flat` 的 Array 层级
+
+```js
+> [ 1,2, [3,4], [[5,6]] ].flat(0) // no change
+// ->> [ 1, 2, [ 3, 4 ], [ [ 5, 6 ] ] ]
+
+> [ 1,2, [3,4], [[5,6]] ].flat(1)
+// ->> [ 1, 2, 3, 4, [ 5, 6 ] ]
+
+> [ 1,2, [3,4], [[5,6]] ].flat(2)
+// ->> [ 1, 2, 3, 4, 5, 6 ]
+```
+
+当 `depth=0` 的时候，就表示不会对 Array 内置的 Array 进行 flat 操作
+
+### 8.2 flatMap
+
+我们再看一下 `Array<T>.prototype.flatMap()` 的定义:
+
+```js
+.flatMap<U>(
+  callback: (value: T, index: number, array: T[]) => U|Array<U>,
+  thisValue?: any
+): U[]
+```
+
+`flatMap` 是 map 和 flat 的结合，下面的两个操作是等价的:
+
+```js
+arr.flatMap(func)
+arr.map(func).flat(1)
+```
+
+我们看几个 `flatMap` 的例子:
+
+```js
+> ['a', 'b', 'c'].flatMap(x => x)
+// ->> [ 'a', 'b', 'c' ]
+> ['a', 'b', 'c'].flatMap(x => [x])
+// ->> [ 'a', 'b', 'c' ]
+> ['a', 'b', 'c'].flatMap(x => [[x]])
+// ->> [ [ 'a' ], [ 'b' ], [ 'c' ] ]
+
+> ['a', 'b', 'c'].flatMap((x, i) => new Array(i+1).fill(x))
+// ->> [ 'a', 'b', 'b', 'c', 'c', 'c' ]
+```
+
+<br />
+
+## 9. Array 的稳定排序
+
+Array有个 `sort`功能, 可以根据元素内容进行排序
+
+ES10中引入了稳定排序的概念, 也就是说如果排序的key是相同的, 那么这些相同key的顺序在排序中是不会发生变化的
+
+举个例子:
+
+```js
+const arr = [
+  { key: 'b', value: 1 },
+  { key: 'a', value: 2 },
+  { key: 'b', value: 3 },
+];
+```
+
+```js
+arr.sort((x, y) => x.key.localeCompare(y.key, 'en-US'));
+```
+
+我们根据key来进行排序, 从而让a, 排在b前面, 但是两个 `key=b` 的元素位置是不会变化的
+
+```js
+console.log(arr);
+// [
+//   { key: 'a', value: 2 },
+//   { key: 'b', value: 1 },
+//   { key: 'b', value: 3 },
+// ]
+```

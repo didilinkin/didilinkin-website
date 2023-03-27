@@ -1,0 +1,685 @@
+---
+sidebar_position: 9
+sidebar_label: ES 2022
+description: ECMAScript 2022
+title: ECMAScript 2022 新特性
+---
+
+<!-- https://juejin.cn/post/7112632005912690701#heading -->
+<!-- https://www.infoq.cn/article/jbx0eejj2tsz7fwcwz56 -->
+<!-- https://www.51cto.com/article/744047.html -->
+<!-- https://tie.pub/2022/06/ecmascript-2022/ -->
+<!-- https://zhuanlan.zhihu.com/p/613831758 -->
+
+## 1. error.cause 异常链
+
+通过分析错误及其子类让我们指定错误背后的原因
+
+在 ECMAScript 2022 规范中, `new Error()` 中可以指定导致它的原因：
+
+```js
+function readFiles(filePaths) {
+  return filePaths.map(
+    (filePath) => {
+      try {
+        // ···
+      } catch (error) {
+        throw new Error(
+          `While processing ${filePath}`,
+          {cause: error}
+        );
+      }
+    });
+}
+```
+<br />
+
+直接看示例，通过 err1.cause 可以拿到 err0
+
+如果这个异常被重新抛出了很多次，那通过 err1.cause.cause.... 就能拿到所有相关的异常
+```js showLineNumbers
+function willThrowError() {
+  try {
+    // do something
+  } catch (err0) {
+    throw new Error('one error', { cause: err })
+  }
+}
+
+try {
+  willThrowError()
+} catch (err1) {
+  // 通过 err1.cause 就能拿到 err0 了
+}
+```
+
+<br />
+
+Error, 支持包含错误原因支持, 这允许在错误链中进行类似 Java 的堆栈跟踪
+
+错误构造函数现在允许包含一个 `cause` 字段的选项
+
+```js
+function errormsg() {
+  try {
+    noFun();
+  } catch (err) {
+    // 支持原因
+    throw new Error('causeError', { cause: 'fun为定义，diy error msg' });
+  }
+}
+function goFun() {
+    try {
+    errormsg();
+  } catch (err) {
+    console.log(`Cause by: ${err.cause}`); // Cause by: fun为定义，diy error msg
+  }
+}
+goFun()
+```
+
+
+
+<br />
+
+## 2. 类的实例成员
+
+### 类的新成员
+
+* 公有成员现在可以通过下面的方式创建：
+  * 实例的公有变量
+  * 静态成员变量
+* 新支持的私有成员可以通过下面的方式创建：
+  * 私有成员变量（实例的私有成员变量和静态私有成员变量）
+* 静态初始化代码块
+
+```js
+class MyClass {
+  instancePublicField = 1;
+  static staticPublicField = 2;
+
+  #instancePrivateField = 3;
+  static #staticPrivateField = 4;
+
+  #nonStaticPrivateMethod() {}
+  get #nonStaticPrivateAccessor() {}
+  set #nonStaticPrivateAccessor(value) {}
+
+  static #staticPrivateMethod() {}
+  static get #staticPrivateAccessor() {}
+  static set #staticPrivateAccessor(value) {}
+
+  static {
+    // Static initialization block
+  }
+}
+```
+
+
+### 2.1 公共实例字段
+
+公共类字段允许我们使用赋值运算符 (=) 将实例属性添加到类定义中
+
+:::info
+在这个例子中，在构造函数中定义了实例字段和绑定方法，通过新的类语法，可以使代码更加直观
+
+新的公共类字段语法允许我们直接将实例属性作为属性添加到类上，而无需使用构造函数方法。这样就简化了类的定义，使代码更加简洁、可读：
+
+```jsx
+import React from "react";
+
+export class Incrementor extends React.Component {
+  state = { count: 0 };
+
+  increment = () => this.setState({ count: this.state.count + 1 });
+
+  render = () => (
+    <button onClick={this.increment}>Increment: {this.state.count}</button>
+  );
+}
+```
+:::
+
+有些小伙伴可能就疑问了，这个功能很早就可以使用了呀
+
+但是它现在还不是标准的 ECMAScript, 默认是不开启的, 如果使用 `create-react-app` 创建 React 项目, 那么它默认是启用的, 否则我们必须使用正确的babel插件才能正常使用 (@babel/preset-env)
+
+:::info
+公共实例字段存在于每个创建的类实例上。它们要么是在 `Object.defineProperty()` 中添加，要么是在基类中的构造时添加（构造函数主体执行之前执行），要么在子类的 `super()` 返回之后添加：
+
+```js
+class Incrementor {
+  count = 0
+}
+
+const instance = new Incrementor();
+console.log(instance.count); // 0
+```
+
+未初始化的字段会自动设置为 `undefined`:
+
+```js
+class Incrementor {
+  count
+}
+
+const instance = new Incrementor();
+console.assert(instance.hasOwnProperty('count'));
+console.log(instance.count);  // undefined
+```
+
+可以进行字段的计算：
+```js
+const PREFIX = 'main';
+
+class Incrementor {
+  [`${PREFIX}Count`] = 0
+}
+
+const instance = new Incrementor();
+console.log(instance.mainCount);   // 0
+```
+:::
+
+<br />
+
+### 2.2 私有实例字段、方法和访问器
+
+私有类字段、方法将使用哈希 #前缀进行定义
+
+:::info
+```js
+class TimeTracker {
+  name = 'zhangsan';
+  project = 'blog';
+  hours = 0;
+
+  set addHours(hour) {
+    this.hours += hour;
+  }
+
+  get timeSheet() {
+    return `${this.name} works ${this.hours || 'nothing'} hours on ${this.project}`;
+  }
+}
+
+let person = new TimeTracker();
+person.addHours = 2; // 标准 setter
+person.hours = 4;    // 绕过 setter 进行设置
+person.timeSheet;
+```
+
+可以看到，在类中没有任何措施可以防止在不调用 `setter` 的情况下更改属性。
+
+而私有类字段将使用哈希 `#` 前缀定义，从上面的示例中，可以修改它以包含私有类字段，以防止在类方法之外更改属性:
+
+```js
+class TimeTracker {
+  name = 'zhangsan';
+  project = 'blog';
+  #hours = 0;  // 私有类字段
+
+  set addHours(hour) {
+    this.#hours += hour;
+  }
+
+  get timeSheet() {
+    return `${this.name} works ${this.#hours || 'nothing'} hours on ${this.project}`;
+  }
+}
+
+let person = new TimeTracker();
+person.addHours = 4; // 标准 setter
+person.timeSheet     // zhangsan works 4 hours on blog
+```
+
+当尝试在 `setter` 方法之外修改私有类字段时，就会报错:
+
+```js
+person.hours = 4 // Error Private field '#hours' must be declared in an enclosing class
+```
+
+还可以将方法或 `getter/setter` 设为私有，只需要给这些方法名称前面加 `#` 即可:
+
+```js
+class TimeTracker {
+  name = 'zhangsan';
+  project = 'blog';
+  #hours = 0;   // 私有类字段
+
+  set #addHours(hour) {
+    this.#hours += hour;
+  }
+
+  get #timeSheet() {
+    return `${this.name} works ${this.#hours || 'nothing'} hours on ${this.project}`;
+  }
+
+  constructor(hours) {
+    this.#addHours = hours;
+    console.log(this.#timeSheet);
+  }
+}
+
+let person = new TimeTracker(4); // zhangsan works 4 hours on blog
+```
+
+由于尝试访问对象上不存在的私有字段会发生异常，因此需要能够检查对象是否具有给定的私有字段
+
+可以使用 `in` 运算符来检查对象上是否有私有字段:
+
+```js
+class Example {
+  #field
+
+  static isExampleInstance(object) {
+    return #field in object;
+  }
+}
+```
+:::
+
+<br />
+
+### 2.3 静态公共字段
+
+ES 2022 提供了一种在 JavaScript 中使用 `static` 关键字声明静态类字段的方法
+
+:::info
+在ES6中, 不能在类的每个实例中访问静态字段或方法, 只能在原型中访问
+
+ES 2022 提供了一种在 JavaScript 中使用 `static` 关键字声明静态类字段的方法
+
+下面来看一个例子：
+
+```js
+class Shape {
+  static color = 'blue';
+
+  static getColor() {
+    return this.color;
+  }
+
+  getMessage() {
+    return `color：${this.color}` ;
+  }
+}
+```
+
+可以从类本身访问静态字段和方法:
+
+```js
+console.log(Shape.color); // blue
+console.log(Shape.getColor()); // blue
+console.log('color' in Shape); // true
+console.log('getColor' in Shape); // true
+console.log('getMessage' in Shape); // false
+```
+
+实例不能访问静态字段和方法:
+
+```js
+const shapeInstance = new Shape();
+
+console.log(shapeInstance.color); // undefined
+console.log(shapeInstance.getColor); // undefined
+console.log(shapeInstance.getMessage());// color：undefined
+```
+
+静态字段只能通过静态方法访问:
+
+```js
+console.log(Shape.getColor()); // blue
+console.log(Shape.getMessage()); //TypeError: Shape.getMessage is not a function
+```
+
+这里的 `Shape.getMessage()` 就报错了, 因为 `getMessage` 不是一个静态函数，所以它不能通过类名 `Shape` 访问
+
+可以通过以下方式来解决这个问题：
+
+```js
+getMessage() {
+  return `color：${Shape.color}` ;
+}
+```
+
+静态字段和方法是从父类继承的:
+
+```js
+class Rectangle extends Shape { }
+
+console.log(Rectangle.color); // blue
+console.log(Rectangle.getColor()); // blue
+console.log('color' in Rectangle); // true
+console.log('getColor' in Rectangle); // true
+console.log('getMessage' in Rectangle); // false
+```
+:::
+
+<br />
+
+### 2.4 静态私有字段和方法
+
+与私有实例字段和方法一样，静态私有字段和方法也使用哈希 #前缀来定义
+
+:::info
+```js
+class Shape {
+  static #color = 'blue';
+
+  static #getColor() {
+    return this.#color;
+  }
+
+  getMessage() {
+    return `color：${Shape.#getColor()}` ;
+  }
+}
+const shapeInstance = new Shape();
+shapeInstance.getMessage(); // color：blue
+```
+
+私有静态字段有一个限制：只有定义私有静态字段的类才能访问该字段
+
+这可能在使用 `this` 时导致出乎意料的情况：
+
+```js
+class Shape {
+  static #color = 'blue';
+  static #getColor() {
+    return this.#color;
+  }
+  static getMessage() {
+    return `color：${this.#color}` ;
+  }
+  getMessageNonStatic() {
+    return `color：${this.#getColor()}` ;
+  }
+}
+
+class Rectangle extends Shape {}
+
+console.log(Rectangle.getMessage()); // Uncaught TypeError: Cannot read private member #color from an object whose class did not declare it
+const rectangle = new Rectangle();
+console.log(rectangle.getMessageNonStatic()); // TypeError: Cannot read private member #getColor from an object whose class did not declare it
+```
+
+在这个例子中, `this` 指向的是 `Rectangle` 类，它无权访问私有字段 `#color`
+
+当我们尝试调用 `Rectangle.getMessage()` 时，它无法读取 `#color` 并抛出了 `TypeError`
+
+可以这样来进行修改:
+
+```js
+class Shape {
+  static #color = 'blue';
+  static #getColor() {
+    return this.#color;
+  }
+  static getMessage() {
+    return `${Shape.#color}`;
+  }
+  getMessageNonStatic() {
+    return `color：${Shape.#getColor()} color`;
+  }
+}
+
+class Rectangle extends Shape {}
+console.log(Rectangle.getMessage()); // color：blue
+const rectangle = new Rectangle();
+console.log(rectangle.getMessageNonStatic()); // color：blue
+```
+:::
+
+<br />
+
+### 2.5 类静态初始化块
+
+该规范就提供了一种在类声明/定义期间评估静态初始化代码块的优雅方法，可以访问类的私有字段
+
+:::info
+静态私有和公共字段只能让我们在类定义期间执行静态成员的每个字段初始化
+
+如果我们需要在初始化期间像 `try…catch` 一样进行异常处理，就不得不在类之外编写此逻辑
+
+该规范就提供了一种在类声明/定义期间评估静态初始化代码块的优雅方法，可以访问类的私有字段
+
+先来看一个例子：
+
+```js
+class Person {
+  static GENDER = "Male"
+  static TOTAL_EMPLOYED;
+  static TOTAL_UNEMPLOYED;
+
+  try {
+    // ...
+  } catch {
+    // ...
+  }
+}
+```
+
+上面的代码就会引发错误, 可以使用类静态块来重构它, 只需将 `try...catch` 包裹在 static 中即可：
+
+```js
+class Person {
+  static GENDER = "Male"
+  static TOTAL_EMPLOYED;
+  static TOTAL_UNEMPLOYED;
+
+  static {
+    try {
+      // ...
+    } catch {
+      // ...
+    }
+  }
+}
+```
+
+此外，类静态块提供对词法范围的私有字段和方法的特权访问
+
+这里需要在具有实例私有字段的类和同一范围内的函数之间共享信息的情况下很有用
+
+```js
+let getData;
+
+class Person {
+  #x
+
+  constructor(x) {
+    this.#x = { data: x };
+  }
+
+  static {
+    getData = (obj) => obj.#x;
+  }
+}
+
+function readPrivateData(obj) {
+  return getData(obj).data;
+}
+
+const john = new Person([2,4,6,8]);
+
+readPrivateData(john); // [2,4,6,8]
+```
+
+这里, `Person` 类与 `readPrivateData` 函数共享了私有实例属性
+:::
+
+<br />
+
+## 3. Object.hasOwn()
+
+在ES2022之前, 可以使用 `Object.prototype.hasOwnProperty()` 来检查一个属性是否属于对象。
+
+`Object.hasOwn()` 特性是一种更简洁、更可靠的检查属性是否直接设置在对象上的方法:
+
+```js
+const example = {
+  property: '123'
+};
+
+console.log(Object.prototype.hasOwnProperty.call(example, 'property'));
+console.log(Object.hasOwn(example, 'property'));
+```
+
+<br />
+
+## 4. at() 方法返回指定索引的元素
+
+at() 是一个数组方法，用于通过给定索引来获取数组元素
+
+它可以接受 负索引来从给定数据类型的末尾读取元素。支持此功能的数据类型有以下：
+
+* `String`
+
+* `Array`
+
+* 所有类型化数组类: `Uint8Array` 等
+
+当给定索引为正时，这种新方法与使用括号表示法访问具有相同的行为
+
+当给出负整数索引时，就会从数组的最后一项开始检索:
+
+```js
+const array = [0,1,2,3,4,5];
+
+console.log(array[array.length-1]);  // 5
+console.log(array.at(-1));  // 5
+
+console.log(array[array.lenght-2]);  // 4
+console.log(array.at(-2));  // 4
+```
+
+除了数组，字符串也可以使用 `at()`方法进行索引:
+
+```js
+const str = "hello world";
+
+console.log(str[str.length - 1]);  // d
+console.log(str.at(-1));  // d
+```
+
+案例:
+```js
+const list = ['apple', 'banner', 'Grape', 'other', 'pear'];
+list[0]; // apple
+list.at(0); // apple
+list.at(-1); // pear
+list.at(-2); // other
+```
+
+<br />
+
+## 5. 顶层 await
+
+顶层 `await` 允许在 `async` 函数外面使用 `await` 关键字
+
+它允许模块充当大型异步函数，通过顶层 `await`, 这些 ECMAScript 模块可以等待资源加载，这样其他导入这些模块的模块在执行代码之前要等待资源加载完再去执行
+
+```js
+const sleep = (delay = 1000) => {
+  return new Promise((resolve) => {
+    setTimeout(() {
+      resolve(true);
+    }, delay);
+  });
+};
+
+await sleep(3000);
+// 之前的await只能允许在async函数中使用，ES13允许在顶层使用await函数
+```
+
+<br />
+
+## 6. 正则表达式匹配索引
+
+如果我们在正则表达式中添加标记 /d, 使用它就会产生匹配对象, 记录着每个组捕获的开始和结束索引 (行 A 和 B)
+
+```js {5,10} showLineNumbers
+const matchObj = /(a+)(b+)/d.exec('aaaabb');
+
+assert.equal(matchObj[1], 'aaaa');
+assert.deepEqual(
+  matchObj.indices[1], [0, 4] // (A)
+);
+
+assert.equal(matchObj[2], 'bb');
+assert.deepEqual(
+  matchObj.indices[2], [4, 6] // (B)
+);
+```
+
+该特性允许我们利用 `d` 字符来表示我们想要匹配字符串的开始和结束索引
+
+以前，只能在字符串匹配操作期间获得一个包含提取的字符串和索引信息的数组
+
+在某些情况下，这是不够的
+
+因此，在这个规范中，如果设置标志 `/d`, 将额外获得一个带有开始和结束索引的数组
+
+```js
+const matchObj = /(a+)(b+)/d.exec('aaaabb');
+
+console.log(matchObj[1]) // 'aaaa'
+console.log(matchObj[2]) // 'bb'
+```
+
+由于 `/d` 标识的存在, `matchObj` 还有一个属性 `.indices`, 它用来记录捕获的每个编号组:
+
+```js
+console.log(matchObj.indices[1])  // [0, 4]
+console.log(matchObj.indices[2])  // [4, 6]
+```
+
+我们还可以使用命名组:
+
+```js
+const matchObj = /(?<as>a+)(?<bs>b+)/d.exec('aaaabb');
+
+console.log(matchObj.groups.as);  // 'aaaa'
+console.log(matchObj.groups.bs);  // 'bb'
+```
+
+这里给两个字符匹配分别命名为 `as` 和 `bs`,然后就可以通过 `groups` 来获取到这两个命名分别匹配到的字符串
+
+它们的索引存储在 `matchObj.indices.groups` 中:
+
+```js
+console.log(matchObj.indices.groups.as);  // [0, 4]
+console.log(matchObj.indices.groups.bs);  // [4, 6]
+```
+
+匹配索引的一个重要用途就是指向语法错误所在位置的解析器
+
+下面的代码解决了一个相关问题：它指向引用内容的开始和结束位置
+
+```js
+const reQuoted = /“([^”]+)”/dgu;
+function pointToQuotedText(str) {
+  const startIndices = new Set();
+  const endIndices = new Set();
+  for (const match of str.matchAll(reQuoted)) {
+    const [start, end] = match.indices[1];
+    startIndices.add(start);
+    endIndices.add(end);
+  }
+  let result = '';
+  for (let index=0; index < str.length; index++) {
+    if (startIndices.has(index)) {
+      result += '[';
+    } else if (endIndices.has(index+1)) {
+      result += ']';
+    } else {
+      result += ' ';
+    }
+  }
+  return result;
+}
+
+console.log(pointToQuotedText('They said “hello” and “goodbye”.'));
+// '           [   ]       [     ]  '
+```

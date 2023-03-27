@@ -2,16 +2,183 @@
 sidebar_position: 3
 sidebar_label: ES 2017
 description: ECMAScript 2017
-title: ECMAScript 2017
+title: ECMAScript 2017 新特性
 ---
 <!-- http://blog.ycqupup.com/archives/es8%E6%96%B0%E7%89%B9%E6%80%A7 -->
-### async/await
+<!-- https://juejin.cn/post/7149382214076104717 -->
+<!-- https://xie.infoq.cn/article/4e4590920394275829b39d853 -->
+
+## 1. Async 函数
+
+我们在 ES6 中提到了 generator, `Async` 函数的操作和 generator 很类似
 
 提供了 `async` 和 `await` 语法，可以用来更简便的编写异步代码
 
+我们看下 `Async` 的使用:
+
+```js
+//Async 函数定义：
+async function foo() {}
+
+//Async 函数表达式：
+const foo = async function () {};
+
+//Async 方法定义：
+let obj = { async foo() {} }
+
+//Async 箭头函数：
+const foo = async () => {};
+```
+
+`Async` 函数返回的是一个封装的 Promise 对象:
+
+```js
+async function asyncFunc() {
+    return 123;
+}
+
+asyncFunc()
+.then(x => console.log(x));
+    // 123
+```
+
+如果在函数中抛出异常, 则会 `reject` Promise:
+
+```js
+async function asyncFunc() {
+    throw new Error('Problem!');
+}
+
+asyncFunc()
+.catch(err => console.log(err));
+    // Error: Problem!
+```
+
+上面的例子中我们在 `async` 函数使用的是同步的代码，如果想要在 `async` 中执行异步代码，则可以使用 `await`, 注意 `await` 只能在 `async` 中使用
+
+`await` 后面接的是一个 Promise
+
+如果 Promise 完成了, 那么 `await` 被赋值的结果就是 Promise 的值
+
+如果 Promise 被 `reject` 了，那么 `await` 将会抛出异常
+
+```js
+async function asyncFunc() {
+    const result = await otherAsyncFunc();
+    console.log(result);
+}
+
+// Equivalent to:
+function asyncFunc() {
+    return otherAsyncFunc()
+    .then(result => {
+        console.log(result);
+    });
+}
+```
+
+我们可以顺序处理异步执行的结果:
+
+```js
+async function asyncFunc() {
+    const result1 = await otherAsyncFunc1();
+    console.log(result1);
+    const result2 = await otherAsyncFunc2();
+    console.log(result2);
+}
+
+// Equivalent to:
+function asyncFunc() {
+    return otherAsyncFunc1()
+    .then(result1 => {
+        console.log(result1);
+        return otherAsyncFunc2();
+    })
+    .then(result2 => {
+        console.log(result2);
+    });
+}
+```
+
+也可以并行执行异步结果:
+
+```js
+async function asyncFunc() {
+    const [result1, result2] = await Promise.all([
+        otherAsyncFunc1(),
+        otherAsyncFunc2(),
+    ]);
+    console.log(result1, result2);
+}
+
+// Equivalent to:
+function asyncFunc() {
+    return Promise.all([
+        otherAsyncFunc1(),
+        otherAsyncFunc2(),
+    ])
+    .then([result1, result2] => {
+        console.log(result1, result2);
+    });
+}
+```
+
+最后看下如何处理异常:
+
+```js
+async function asyncFunc() {
+  try {
+    await otherAsyncFunc();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// Equivalent to:
+function asyncFunc() {
+  return otherAsyncFunc()
+  .catch(err => {
+    console.error(err);
+  });
+}
+```
+
+需要注意的是，如果 `async` 中返回的不是 Promise, 那么将会被封装成为 Promise
+
+如果已经是 Promise 对象的话，则不会被再次封装:
+
+```js
+async function asyncFunc() {
+  return Promise.resolve(123);
+}
+asyncFunc()
+  .then(x => console.log(x)) // 123
+```
+
+同样的，如果返回一个 `rejected` 的 Promise 对象, 则和抛出异常一样的结果:
+
+```js
+async function asyncFunc() {
+  return Promise.reject(new Error('Problem!'));
+}
+asyncFunc()
+  .catch(err => console.error(err)); // Error: Problem!
+```
+
+如果你只是想触发异步方法, 但是并不想等待它执行完毕, 那么不使用 `await`:
+
+```js
+async function asyncFunc() {
+    const writer = openFile('someFile.txt');
+    writer.write('hello'); // don’t wait
+    writer.write('world'); // don’t wait
+    await writer.close(); // wait for file to close
+}
+```
+
 <br />
 
-### 函数最后一个参数尾部支持逗号
+## 2. 函数最后一个参数 尾部支持逗号
 
 提议完全是关于语法的，对语义没有任何改变。主要解决当我们添加函数的参数时，版本控制系统导致两行更新
 
@@ -29,15 +196,204 @@ clownPuppiesEverywhere (
 
 <br />
 
-### Obiect.getOwnPropertyDescriptors
+## 3. Object 的新方法
+
+Object 提供了两个遍历的新方法 `entries` 和 `values`
+
+除此之外, Object 还有一个 `getOwnPropertyDescriptors` 新方法
+
+这个方法返回的是 Object 中的 属性的描述, 所谓 属性的描述 就是指 这个属性是否可写, 是否可以数之类
+
+### 3.1 entries
+
+:::info
+
+* 返回对象中的 键/值对 的数组
+* 在循环中 使用对象变得简单
+* 也使得将 对象转换为映射变得简单
+
+```js
+Object.entries(value : any) : Array<[string,any]>
+```
+
+`entries` 返回的是一个数组，里面存储的是 `key-value` 对:
+
+```js
+> Object.entries({ one: 1, two: 2 })
+[ [ 'one', 1 ], [ 'two', 2 ] ]
+```
+
+```js
+const fruits = {Bananas:300, Oranges:200, Apples:500};
+let text = "";
+// 循环中使用对象
+for (let [fruit, value] of Object.entries(fruits)) {
+  text += fruit + ": " + value + "";
+}
+// 对象转换为映射
+const myMap = new Map(Object.entries(fruits));
+```
+
+
+`entries` 给了我们一个遍历 Object 的方法:
+
+```js
+let obj = { one: 1, two: 2 };
+for (let [k,v] of Object.entries(obj)) {
+    console.log(`{JSON.stringify(k)}:{JSON.stringify(v)}`);
+}
+// Output:
+// "one": 1
+// "two": 2
+```
+
+我们可以使用 `entries` 来创建 Map:
+
+```js
+let map = new Map(Object.entries({
+    one: 1,
+    two: 2,
+}));
+console.log(JSON.stringify([...map]));
+    // [["one",1],["two",2]]
+```
+:::
 
 <br />
 
-### String.prototype.(padStart padEnd}
+### 3.2 values
+
+:::info
+* `Object.values()` 方法返回一个 给定对象自身的所有 可枚举属性值的数组
+* 属性的顺序与通过手动循环对象的属性值所给出的顺序相同
+
+语法:
+```js
+const person = {
+  firstName : "John",
+  lastName : "Doe",
+  age : 50,
+  eyeColor : "blue"
+};
+Object.values(person) //  ['John', 'Doe', 50, 'blue']
+// 返回的是一个数组，数组中存放的是 Object 的 `value`
+```
+
+拓展:
+
+除了 `Object.value` 语法之外，还有一个与之相对应的 `Object.keys`
+
+不同的是: `Object.keys` 返回一个所有元素为字符串的数组, 其元素来自给定的 object 上面可直接枚举的属性
+
+这些属性的 顺序 与 手动遍历 该对象属性时的一致
+
+:::
+<br />
+
+### 3.3 Obiect.getOwnPropertyDescriptors()
+
+:::info
+```js
+const obj = {
+    [Symbol('foo')]: 123,
+    get bar() { return 'abc' },
+};
+console.log(Object.getOwnPropertyDescriptors(obj));
+
+// Output:
+// { [Symbol('foo')]:
+//    { value: 123,
+//      writable: true,
+//      enumerable: true,
+//      configurable: true },
+//   bar:
+//    { get: [Function: bar],
+//      set: undefined,
+//      enumerable: true,
+//      configurable: true } }
+```
+
+key 是 Obj 中的 `key`
+
+value 就是 `PropertyDescriptors`
+
+虽然在 ES6 中, Obj 已经引入了一个 `Object.assign()`方法用来拷贝 `properties`, 但是这个 `assign` 只能拷贝具有默认属性值的属性
+
+对于那些具有非默认属性值的属性 `getters`, `setters`, `non-writable properties` 来说, `Object.assign` 是不能拷贝的
+
+这个时候就需要使用 `getOwnPropertyDescriptors` 方法了
+
+```js
+const source = {
+    set foo(value) {
+        console.log(value);
+    }
+};
+console.log(Object.getOwnPropertyDescriptor(source, 'foo'));
+// { get: undefined,
+//   set: [Function: foo],
+//   enumerable: true,
+//   configurable: true }
+
+const target1 = {};
+Object.assign(target1, source);
+console.log(Object.getOwnPropertyDescriptor(target1, 'foo'));
+// { value: undefined,
+//   writable: true,
+//   enumerable: true,
+//   configurable: true }
+```
+
+可以看到 obj 就有一个 `foo` 属性，它是一个 `setter`
+
+所以使用 `assign` 是不能进行拷贝的
+
+我们看下怎么使用 `defineProperties` 和 `getOwnPropertyDescriptors` 来进行拷贝:
+
+```js
+const target2 = {};
+Object.defineProperties(target2, Object.getOwnPropertyDescriptors(source));
+console.log(Object.getOwnPropertyDescriptor(target2, 'foo'));
+// { get: undefined,
+//   set: [Function: foo],
+//   enumerable: true,
+//   configurable: true }
+```
+
+除了拷贝属性之外, 我们还可以拷贝对象:
+
+```js
+const clone = Object.create(Object.getPrototypeOf(obj),
+    Object.getOwnPropertyDescriptors(obj));
+```
+:::
+<br />
+
+## 4. String 的新方法
+
+String 添加了两个新的方法 `padStart` 和 `padEnd`
+
+`pad` 就是填充的意思, 我们可以 从前面填充 也可以 从后面填充
+
+我们看下 `pad` 的用法
+
+```js
+String.prototype.padStart(maxLength, fillString=' ')
+String.prototype.padEnd(maxLength, fillString=' ')
+```
+
+看下具体的使用:
+
+```js
+> 'x'.padStart(5, 'ab')
+'ababx'
+> 'x'.padEnd(5, 'ab')
+'xabab'
+```
 
 <br />
 
-### Obiect.values/Obiect entries
+## 5. Obiect.values/Obiect entries
 
 `Object.values` 是一个与 `Object.keys` 类似的新函数，但返回的是 Object 自身属性的所有值，不包括继承的值
 
@@ -58,3 +414,170 @@ const obj = { a: 1, b: 2, c: 3 }
 
 console.log(Object.entries(obj)) // 输出：[["a",1],["b",2],["c",3]]
 ```
+
+<br />
+
+## 6. 共享内存 和 原子操作
+
+ES7 引入了一个新的构造函数 `SharedArrayBuffer` 和命名空间 `Atomics`
+
+在 JS 中, 除了主线程之外，我们还可以创建 worker 线程, 主线程和 worker 线程之间的通信是通过 `postMessage` 方法来进行的
+
+但是这样的通信方式并不高效
+
+于是引入了 `SharedArrayBuffer` 这样的共享空间, 来提升消息传输效率
+
+```js
+// main.js
+
+const worker = new Worker('worker.js');
+
+// To be shared
+const sharedBuffer = new SharedArrayBuffer( // (A)
+    10 * Int32Array.BYTES_PER_ELEMENT); // 10 elements
+
+// Share sharedBuffer with the worker
+worker.postMessage({sharedBuffer}); // clone
+
+// Local only
+const sharedArray = new Int32Array(sharedBuffer); // (B)
+```
+
+上面的例子中, 我们创建了一个 `SharedArrayBuffer`, 并将这个 `SharedArrayBuffer` 通过 `postMessage` 的方式发给 worker
+
+我们知道 `postMessage` 是以拷贝的方式来发送消息的, 但是这是正确使用共享的方式
+
+我看下在 worker 中怎么接收这个 Buffer:
+
+```js title=" worker.js"
+self.addEventListener('message', function (event) {
+  const {sharedBuffer} = event.data;
+  const sharedArray = new Int32Array(sharedBuffer); // (A)
+  // ···
+});
+```
+
+在 worker 中，我们将 `sharedBuffer` 使用 `Int32Array` 封装起来，作为 Array 而使用
+
+那么我们考虑一个问题，在使用 `sharedBuffer` 的过程中，会出现什么问题呢?
+
+因为是共享的, 所以可以在多个 worker 线程中同时被使用
+
+如果在同时被使用的时候就会出现 多线程共享数据的问题, 也就是 并发的问题
+
+为了解决并发的问题，我们回想一下在 java 中特别有一个 concurrent 包，里面有一些 `Atomic` 的类，可以执行原子性操作
+
+在 ES8 中, 同样引入了 `Atomics`, 用来进行 `SharedArrayBuffer` 的原子性操作
+
+同时，使用 `Atomics` 还可以禁止重排序
+
+`Atomics` 实际操作的 Typed Array: `Int8Array`, `Uint8Array`, `Int16Array`, `Uint16Array`, `Int32Array` or `Uint32Array`
+
+注意，这些 Array 都是 `SharedArrayBuffer` 的封装 Array, 并且都是 `Int` 的 Array (目前只支持 `Int` 类型)
+
+<br />
+
+首先看下 `Atomics` 怎么解决数组的并发写入和读取的问题:
+
+```js
+Atomics.load(ta : TypedArray<T>, index) : T
+Atomics.store(ta : TypedArray<T>, index, value : T) : T
+Atomics.exchange(ta : TypedArray<T>, index, value : T) : T
+Atomics.compareExchange(ta : TypedArray<T>, index, expectedValue, replacementValue) : T
+```
+
+load 和 store 可以将 ta 作为一个整体来操作
+
+看下使用例子:
+
+```js title="main.js"
+console.log('notifying...');
+Atomics.store(sharedArray, 0, 123);
+
+// worker.js
+while (Atomics.load(sharedArray, 0) !== 123) ;
+console.log('notified');
+```
+
+`Atomics` 还提供了 `wait` 和 `notity` 功能:
+
+```js
+Atomics.wait(ta: Int32Array, index, value, timeout)
+Atomics.wake(ta : Int32Array, index, count)
+```
+
+当 `ta[index]` 的值是 value 的时候, `wait` 将会使 worker 等待在 `ta[index]` 之上
+
+而 `wake`, 则是将等待在 `ta[index]`上的 count 个 worker 唤醒
+
+`Atomics` 还提供了一系列的操作:
+
+```js
+Atomics.add(ta : TypedArray<T>, index, value) : T
+Atomics.sub(ta : TypedArray<T>, index, value) : T
+Atomics.and(ta : TypedArray<T>, index, value) : T
+Atomics.or(ta : TypedArray<T>, index, value) : T
+Atomics.xor(ta : TypedArray<T>, index, value) : T
+```
+
+它相当于:
+
+```js
+ta[index] += value;
+```
+
+`Atomic` 有一个很棒的作用就是构建
+
+:::info
+`Atomics` 对象提供了一组静态方法用来对 `SharedArrayBuffer` 对象进行原子操作
+
+这些原子操作属于 `Atomics` 模块
+
+与一般的全局对象不同, `Atomics` 不是构造函数, 因此不能使用 new 操作符调用, 也不能将其当作函数直接调用
+
+`Atomics` 的所有属性和方法都是静态的 (与 Math 对象一样)
+
+多个共享内存的线程能够同时读写同一位置上的数据
+
+原子操作会确保正在读 或 写的数据的值是符合预期的，即下一个原子操作一定会在上一个原子操作结束后才会开始, 其操作过程不会中断
+
+
+* `Atomics.add()`
+> 将指定位置上的数组元素与给定的值相加，并返回相加前该元素的值
+* `Atomics.and()`
+> 将指定位置上的数组元素与给定的值相与，并返回与操作前该元素的值
+* `Atomics.compareExchange()`
+> 如果数组中指定的元素与给定的值相等，则将其更新为新的值，并返回该元素原先的值
+* `Atomics.exchange()`
+> 将数组中指定的元素更新为给定的值，并返回该元素更新前的值
+* `Atomics.load()`
+> 返回数组中指定元素的值
+* `Atomics.or()`
+> 将指定位置上的数组元素与给定的值相或，并返回或操作前该元素的值
+* `Atomics.store()`
+> 将数组中指定的元素设置为给定的值，并返回该值
+* `Atomics.sub()`
+> 将指定位置上的数组元素与给定的值相减，并返回相减前该元素的值
+* `Atomics.xor()`
+> 将指定位置上的数组元素与给定的值相异或，并返回异或操作前该元素的值
+
+----
+
+`wait()` 和 `wake()` 方法采用的是 Linux 上的 `futexes` 模型 (fast user-space mutex, 快速用户空间互斥量), 可以让进程一直等待直到某个特定的条件为真, 主要用于实现阻塞
+
+* `Atomics.wait()`
+> 检测数组中某个指定位置上的值是否仍然是给定值, 是则保持挂起直到被唤醒或超时
+>
+> 返回值为 "ok"、"not-equal" 或 "time-out"
+>
+> 调用时, 如果当前线程不允许阻塞，则会抛出异常 (大多数浏览器都不允许在主线程中调用 `wait()`)
+* `Atomics.wake()`
+> 唤醒 等待队列中正在数组指定位置的元素上等待的线程
+>
+> 返回值为 成功唤醒的线程数量
+* `Atomics.isLockFree(size)`
+> 可以用来检测当前系统是否支持硬件级的原子操作
+>
+> 对于指定大小的数组, 如果当前系统支持硬件级的原子操作, 则返回 true; 否则就意味着对于该数组, `Atomics` 对象中的各原子操作都只能用锁来实现
+:::
+
