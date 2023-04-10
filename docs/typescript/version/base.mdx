@@ -1,0 +1,202 @@
+---
+sidebar_position: 1
+sidebar_label: Base
+description: Typescript Base
+title: Typescript 基础
+---
+
+## 泛型
+
+将类型传递至其他类型, 负责在对类型进行泛化后仍保证类型安全
+
+应始终优先使用泛型, 而非 `any` 或 `unknown`
+
+```ts
+// WITHOUT:
+function getFirstUnsafe(list: any[]): any {
+return list[0];
+}
+const firstUnsafe = getFirstUnsafe(['test']); // typed as any
+// WITH:
+function getFirst<Type>(list: Type[]): Type {
+return list[0];
+}
+const first = getFirst<string>(['test']); // typed as string
+// In this case the parameter can even be dropped because it is inferred from the argument.
+const firstInferred = getFirst(['test']); // typed as string
+// The types accepted as generics can also be limited using `extends`. The Type is also usually shortened to T.
+class List<T extends string | number> {
+private list: T[] = [];
+get(key: number): T {
+return this.list[key];
+}
+push(value: T): void {
+this.list.push(value);
+}
+}
+const list = new List<string>();
+list.push(9); // Type error: Argument of type 'number' is not assignable to parameter of type 'string'.
+const booleanList = new List<boolean>(); // Type error: Type 'boolean' does not satisfy the constraint 'string | number'.
+```
+
+## 实用程序类型
+> TypeScript 中包含多种实用程序类型, 这里解释其中最重要的几种
+
+```ts
+interface Test {
+  name: string;
+  age: number;
+}
+// The Partial utility type makes all properties optional.
+type TestPartial = Partial<Test>; // typed as { name?: string | undefined; age?: number | undefined; }
+// The Required utility type does the opposite.
+type TestRequired = Required<TestPartial>; // typed as { name: string; age: number; }
+// The Readonly utility type makes all properties readonly.
+type TestReadonly = Readonly<Test>; // typed as { readonly name: string; readonly age: string }
+// The Record utility type allows the simple definition of objects/maps/dictionaries. It is preferred to index signatures whenever possible.
+const config: Record<string, boolean> = { option: false, anotherOption: true };
+// The Pick utility type gets only the specified properties.
+type TestLess = Pick<Test, 'name'>; // typed as { name: string; }
+type TestBoth = Pick<Test, 'name' | 'age'>; // typed as { name: string; age: string; }
+// The Omit utility type ignores the specified properties.type
+type TestFewer = Omit<Test, 'name'>; // typed as { age: string; }
+type TestNone = Omit<Test, 'name' | 'age'>; // typed as {}
+// The Parameters utility type gets the parameters of a function type.
+function doSmth(value: string, anotherValue: number): string {
+  return 'test';
+}
+type Params = Parameters<typeof doSmth>; // typed as [value: string, anotherValue: number]
+// The ReturnType utility type gets the return type of a function type.
+type Return = ReturnType<typeof doSmth>; // typed as string
+// There are many more, some of which are introduced further down.
+```
+
+## 条件类型
+
+根据 某种类型是否匹配 / 扩展另一种类型，来对类型做有条件设置
+
+可以按照 JavaScript 中条件 (三元) 运算符的方式理解
+
+```ts
+// Only extracts the array type if it is an array, otherwise returns the same type.
+type Flatten<T> = T extends any[] ? T[number] : T;
+// Extracts out the element type.
+type Str = Flatten<string[]>; // typed as string
+// Leaves the type alone.
+type Num = Flatten<number>; // typed as number
+```
+
+## 使用 条件类型进行推断
+
+并非所有泛型类型都需要由用户指定，有些也可以从代码中推断得出
+
+要实现基于类型推断的条件逻辑，必须有 `infer` 关键字，它会以某种方式定义临时推断类型变量
+
+```ts
+// Starting with the previous example, this can be written more cleanly.
+type FlattenOld<T> = T extends any[] ? T[number] : T;
+// Instead of indexing the array, we can just infer the Item type from the array.
+type Flatten<T> = T extends (infer Item)[] ? Item : T;
+
+// If we wanted to write a type that gets the return type of a function and otherwise is undefined, we could also infer that.
+type GetReturnType<Type> = Type extends (...args: any[]) => infer Return ? Return : undefined;
+type Num = GetReturnType<() => number>; // typed as number
+type Str = GetReturnType<(x: string) => string>; // typed as string
+type Bools = GetReturnType<(a: boolean, b: boolean) => void>; // typed as undefined
+```
+
+## 元组可选元素与其余元素
+
+使用 `?` 声明元组中的可选元素，使用 `...` 声明元组中的其余元素
+
+```ts
+// If we don't yet know how long a tuple is going to be, but it's at least one, we can specify optional types using `?`.
+const list: [number, number?, boolean?] = [];
+list[0] // typed as number
+list[1] // typed as number | undefined
+list[2] // typed as boolean | undefined
+list[3] // Type error: Tuple type '[number, (number | undefined)?, (boolean | undefined)?]' of length '3' has no element at index '3'.
+// We could also base the tuple on an existing type.
+// If we want to pad an array at the start, we could do that using the rest operator `...`.
+function padStart<T extends any[]>(arr: T, pad: string): [string, ...T] {
+  return [pad, ...arr];
+}
+const padded = padStart([1, 2], 'test'); // typed as [string, number, number]
+```
+
+## 抽象类和方法:
+
+类 和 类中的各方法可以被声明为 `abstract`, 以防止其被实例化
+
+```ts
+abstract class Animal {
+  abstract makeSound(): void;
+  move(): void {
+    console.log('roaming the earth...');
+  }
+}
+// Abstract methods need to be implemented when extended.
+class Cat extends Animal {} // Compile error: Non-abstract class 'Cat' does not implement inherited abstract member 'makeSound' from class 'Animal'.
+class Dog extends Animal {
+  makeSound() {
+    console.log('woof');
+  }
+}
+// Abstract classes cannot be instantiated (like Interfaces), and abstract methods cannot be called.
+new Animal(); // Compile error: Cannot create an instance of an abstract class.
+const dog = new Dog().makeSound(); // "woof"
+```
+
+## 构造函数签名
+
+在类声明之外, 定义构造函数的类型
+
+在大多数情况下不应使用，建议用抽象类代替
+
+```ts
+interface MyInterface {
+  name: string;
+}
+interface ConstructsMyInterface {
+  new(name: string): MyInterface;
+}
+class Test implements MyInterface {
+  name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
+}
+class AnotherTest {
+  age: number;
+}
+function makeObj(n: ConstructsMyInterface) {
+    return new n('hello!');
+}
+const obj = makeObj(Test); // typed as Test
+const anotherObj = makeObj(AnotherTest); // Type error: Argument of type 'typeof AnotherTest' is not assignable to parameter of type 'ConstructsMyInterface'.
+```
+
+## ConstructorParameters Utility 类型
+
+属于 TypeScript 辅助函数，能够根据构造函数类型（但不是类）获取构造函数参数
+
+```ts
+// What if we wanted to get the constructor argument for our makeObj function.
+interface MyInterface {
+  name: string;
+}
+interface ConstructsMyInterface {
+  new(name: string): MyInterface;
+}
+class Test implements MyInterface {
+  name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
+}
+function makeObj(test: ConstructsMyInterface, ...args: ConstructorParameters<ConstructsMyInterface>) {
+  return new test(...args);
+}
+makeObj(Test); // Type error: Expected 2 arguments, but got 1.
+const obj = makeObj(Test, 'test'); // typed as Test
+```

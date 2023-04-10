@@ -1,0 +1,85 @@
+---
+sidebar_position: 4
+sidebar_label: TypeScript 4.3
+description: TypeScript 4.3
+title: TypeScript 4.3
+---
+
+## 属性上的单独写入类型
+
+在定义 `set / get` 访问器时, `write / set` 类型现可不同于 `read / get` 类型
+
+意味着设置器能够接受相同值的多种格式
+
+```ts
+class Test {
+  private _value: number;
+  get value(): number {
+    return this._value;
+  }
+  set value(value: number | string) {
+    if (typeof value === 'number') {
+      this._value = value;
+      return;
+    }
+    this._value = parseInt(value, 10);
+  }
+}
+```
+
+## Override
+
+使用 override, 会将继承的类方法显式标记为覆写
+
+因此当父类发生变化时, TypeScript 会提醒父方法已不存在, 从而实现更安全的复杂继承模式
+
+```ts
+class Parent {
+  getName(): string {
+    return 'name';
+  }
+}
+class NewParent {
+  getFirstName(): string {
+    return 'name';
+  }
+}
+class Test extends Parent {
+  override getName(): string {
+    return 'test';
+  }
+}
+class NewTest extends NewParent {
+  override getName(): string { // Type error: This member cannot have an 'override' modifier because it is not declared in the base class 'NewParent'.
+    return 'test';
+  }
+}
+```
+
+## 静态索引签名
+
+在类上使用静态属性时，现在也可以使用 `static [propName: string]: string` 设置索引签名
+
+```ts
+// PREVIOUSLY:
+class Test {}
+Test.test = ''; // Type error: Property 'test' does not exist on type 'typeof Test'.
+
+// NEW:
+class NewTest {
+  static [key: string]: string;
+}
+NewTest.test = '';
+```
+
+## 对 `JSDOC@link` 标签提供编辑器支持
+
+JSDoc / TSDoc `{@link variable/type/link}` 内联标签现可在编辑器中 显示 和 解析
+
+```ts
+const originalValue = 1;
+/**
+* Copy of {@link originalValue}
+*/
+const value = originalValue;
+```

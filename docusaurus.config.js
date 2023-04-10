@@ -239,7 +239,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} 哈希肯. 本网站使用 Docusaurus 构建`,
+        copyright: `Copyright © ${new Date().getFullYear()} 哈希肯. 本网站使用 <a href="https://docusaurus.io/zh-CN" target="_blank">Docusaurus</a> 构建`,
       },
       prism: {
         theme: lightCodeTheme,

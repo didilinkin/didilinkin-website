@@ -1,0 +1,91 @@
+---
+sidebar_position: 3
+sidebar_label: TypeScript 4.1
+description: TypeScript 4.1
+title: TypeScript 4.1
+---
+
+## 模板字面量类型
+
+在定义字面量类型时，可以通过 `${Type}`等模板指定类型
+
+这样可以构造复杂的字符串类型, 例如将多个字符串字面量组合起来
+
+```ts
+type VerticalDirection = 'top' | 'bottom';
+type HorizontalDirection = 'left' | 'right';
+type Direction = `${VerticalDirection} ${HorizontalDirection}`;
+const dir1: Direction = 'top left';
+const dir2: Direction = 'left'; // Type error: Type '"left"' is not assignable to type '"top left" | "top right" | "bottom left" | "bottom right"'.
+const dir3: Direction = 'left top'; // Type error: Type '"left top"' is not assignable to type '"top left" | "top right" | "bottom left" | "bottom right"'.
+// This can also be combined with generics and the new utility types.
+declare function makeId<T extends string, U extends string>(first: T, second: U): `${Capitalize<T>}-${Lowercase<U>}`;
+```
+
+## 在映射类型中重新映射键
+
+为已映射的类型重新分配类型, 但仍使用其值, 例如 `[K in keyof T as NewKeyType]: T[K]`
+
+```ts
+// Let's say we wanted to reformat an object but prepend its IDs with an underscore.
+const obj = { value1: 0, value2: 1, value3: 3 };
+const newObj: { [Property in keyof typeof obj as `_${Property}`]: number }; // typed as { _value1: number; _value2: number; value3: number; }
+```
+
+## 递归条件类型
+
+在定义之内使用条件类型, 这种类型允许以有条件方式解包无限嵌套值
+
+```ts
+type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T;
+type P1 = Awaited<string>; // typed as string
+type P2 = Awaited<Promise<string>>; // typed as string
+type P3 = Awaited<Promise<Promise<string>>>; // typed as string
+```
+
+## JSDOC `@see` 标签的编辑器支持
+
+JSDoc / TSDoc `@see` variable / type / link 标签现可在编辑器中受到支持
+
+```ts
+const originalValue = 1;
+/**
+* Copy of another value
+* @see originalValue
+*/
+const value = originalValue;
+```
+
+## tsc — explainFiles
+
+`--explainFiles` 选项 可被 TypeScript cli 用于解释哪些文件是编译的一部分、为什么会这样, 这一点对于调试非常重要
+
+警告：对于大型项目或较为复杂的设置，这会生成大量输出，建议改用 `tsc --explainFiles | less` 或其他类似功能
+
+```bash
+tsc --explainFiles
+<<output
+../../.asdf/installs/nodejs/16.13.1/.npm/lib/node_modules/typescript/lib/lib.es5.d.ts
+Library referenced via 'es5' from file '../../.asdf/installs/nodejs/16.13.1/.npm/lib/node_modules/typescript/lib/lib.es2015.d.ts'
+Library referenced via 'es5' from file '../../.asdf/installs/nodejs/16.13.1/.npm/lib/node_modules/typescript/lib/lib.es2015.d.ts'
+../../.asdf/installs/nodejs/16.13.1/.npm/lib/node_modules/typescript/lib/lib.es2015.d.ts
+Library referenced via 'es2015' from file '../../.asdf/installs/nodejs/16.13.1/.npm/lib/node_modules/typescript/lib/lib.es2016.d.ts'
+Library referenced via 'es2015' from file '../../.asdf/installs/nodejs/16.13.1/.npm/lib/node_modules/typescript/lib/lib.es2016.d.ts'
+../../.asdf/installs/nodejs/16.13.1/.npm/lib/node_modules/typescript/lib/lib.es2016.d.ts
+Library referenced via 'es2016' from file '../../.asdf/installs/nodejs/16.13.1/.npm/lib/node_modules/typescript/lib/lib.es2017.d.ts'
+Library referenced via 'es2016' from file '../../.asdf/installs/nodejs/16.13.1/.npm/lib/node_modules/typescript/lib/lib.es2017.d.ts'
+...
+output
+```
+
+## 解构变量可被显式标记为未使用
+
+在解构时, 可使用下划线将变量标记为未使用, 从而防止 TypeScript 抛出 "未使用的变量"错误
+
+```ts
+const [_first, second] = [3, 5];
+console.log(second);
+// Or even shorter
+const [_, value] = [3, 5];
+console.log(value);
+```

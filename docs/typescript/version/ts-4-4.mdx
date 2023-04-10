@@ -1,0 +1,22 @@
+---
+sidebar_position: 5
+sidebar_label: TypeScript 4.4
+description: TypeScript 4.4
+title: TypeScript 4.4
+---
+
+## 精确的可选属性类型 (— exactOptionalPropertyTypes)
+
+使用编译器标志 `--exactOptionalPropertyTypes` 时 或在 `tsconfig.json` 中，隐式允许 undefined (例如 `property?: string`) 的属性将不允许被分配为 `undefined`
+
+相反, undefined 必须经过明确许可, 例如 `property: string` | `undefined`
+
+```ts
+class Test {
+  name?: string;
+  age: number | undefined;
+}
+const test = new Test();
+test.name = 'test'; // Type error: Option 'exactOptionalPropertyTypes' cannot be specified without specifying option 'strictNullChecks'.
+test.age = 0;
+```

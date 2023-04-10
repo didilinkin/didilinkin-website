@@ -1,0 +1,82 @@
+---
+sidebar_position: 2
+sidebar_label: TypeScript 4.0
+description: TypeScript 4.0
+title: TypeScript 4.0
+---
+
+## 可变元组类型
+
+元组中的其余元素现在是通用的, 且允许使用多个其余元素
+
+```ts
+// What if we had a function that combines two tuples of undefined length and types? How can we define the return type?
+// PREVIOUSLY:
+// We could write some overloads.
+declare function concat(arr1: [], arr2: []): [];
+declare function concat<A>(arr1: [A], arr2: []): [A];
+declare function concat<A, B>(arr1: [A], arr2: [B]): [A, B];
+declare function concat<A, B, C>(arr1: [A], arr2: [B, C]): [A, B, C];
+declare function concat<A, B, C, D>(arr1: [A], arr2: [B, C, D]): [A, B, C, D];
+declare function concat<A, B>(arr1: [A, B], arr2: []): [A, B];
+declare function concat<A, B, C>(arr1: [A, B], arr2: [C]): [A, B, C];
+declare function concat<A, B, C, D>(arr1: [A, B], arr2: [C, D]): [A, B, C, D];
+declare function concat<A, B, C, D, E>(arr1: [A, B], arr2: [C, D, E]): [A, B, C, D, E];
+declare function concat<A, B, C>(arr1: [A, B, C], arr2: []): [A, B, C];
+declare function concat<A, B, C, D>(arr1: [A, B, C], arr2: [D]): [A, B, C, D];
+declare function concat<A, B, C, D, E>(arr1: [A, B, C], arr2: [D, E]): [A, B, C, D, E];
+declare function concat<A, B, C, D, E, F>(arr1: [A, B, C], arr2: [D, E, F]): [A, B, C, D, E, F];
+// Even just for three items each, this is really suboptimal.
+// Instead we could combine the types.
+declare function concatBetter<T, U>(arr1: T[], arr2: U[]): (T | U)[];
+// But this types to (T | U)[]
+// NEW:
+// With variadic tuple types, we can define it easily and keep the information about the length.
+declare function concatNew<T extends Arr, U extends Arr>(arr1: T, arr2: U): [...T, ...U];
+const tuple = concatNew([23, 'hey', false] as [number, string, boolean], [5, 99, 20] as [number, number, number]);
+console.log(tuple[0]); // 23
+const element: number = tuple[1]; // Type error: Type 'string' is not assignable to type 'number'.
+console.log(tuple[6]); // Type error: Tuple type '[23, "hey", false, 5, 99, 20]' of length '6' has no element at index '6'.
+```
+
+<br />
+
+## 标记元组元素
+
+元组元素 现可被命名为 `[start: number, end: number]` 的形式
+
+如果命名其中一个元素, 则所有元素必须均被命名
+
+```ts
+type Foo = [first: number, second?: string, ...rest: any[]];
+// This allows the arguments to be named correctly here, it also shows up in the editor.
+declare function someFunc(...args: Foo);
+```
+
+<br />
+
+## 从构造函数推断类属性
+
+在构造函数中设置属性时, 现可推断其类型, 不再需要手动设置
+
+```ts
+class Animal {
+  // No need to set types when they are assigned in the constructor.
+  name;
+  constructor(name: string) {
+    this.name = name;
+    console.log(this.name); // typed as string
+  }
+}
+```
+<br />
+
+## JSDoc `@deprecated` 支持
+
+TypeScript 现可识别 JSDoc / TSDoc `@deprecated` 标签
+
+```ts
+/** @deprecated message */
+type Test = string;
+const test: Test = 'dfadsf'; // Type error: 'Test' is deprecated.
+```

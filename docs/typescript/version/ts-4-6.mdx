@@ -1,0 +1,79 @@
+---
+sidebar_position: 7
+sidebar_label: TypeScript 4.6
+description: TypeScript 4.6
+title: TypeScript 4.6
+---
+
+## 索引访问推断改进
+
+当直接在键内直接索引一个类型时, 如果该类型位于同一对象上, 现在其准确率会更高
+
+这也是 TypeScript 现代化特性的良好体现
+
+```ts
+interface AllowedTypes {
+  'number': number;
+  'string': string;
+  'boolean': boolean;
+}
+// The Record specifies the kind and value type from the allowed types.
+type UnionRecord<AllowedKeys extends keyof AllowedTypes> = {[Key in AllowedKeys]: {
+  kind: Key;
+  value: AllowedTypes[Key];
+  logValue: (value: AllowedTypes[Key]) => void;
+}}[AllowedKeys];
+
+// The function logValue only accepts the value of the Record.
+function processRecord<Key extends keyof AllowedTypes>(record: UnionRecord<Key>) {
+  record.logValue(record.value);
+}
+processRecord({
+  kind: 'string',
+  value: 'hello!',
+  // The value used to implicitly have the type string | number | boolean,
+  // but now is correctly inferred to just string.
+  logValue: value => {
+    console.log(value.toUpperCase());
+  }
+});
+```
+
+## TypeScript Trace Analyzer (— generateTrace)
+
+`--generateTrace` 选项可在 TypeScript CLI 当中用于生成一个文件，其中包含关于类型检查和编译过程的详情信息
+
+这有助于优化复杂类型
+
+```bash
+tsc --generateTrace trace
+cat trace/trace.json
+<<output
+[
+{"name":"process_name","args":{"name":"tsc"},"cat":"__metadata","ph":"M","ts":...,"pid":1,"tid":1},
+{"name":"thread_name","args":{"name":"Main"},"cat":"__metadata","ph":"M","ts":...,"pid":1,"tid":1},
+{"name":"TracingStartedInBrowser","cat":"disabled-by-default-devtools.timeline","ph":"M","ts":...,"pid":1,"tid":1},
+{"pid":1,"tid":1,"ph":"B","cat":"program","ts":...,"name":"createProgram","args":{"configFilePath":"/...","rootDir":"/..."}},
+{"pid":1,"tid":1,"ph":"B","cat":"parse","ts":...,"name":"createSourceFile","args":{"path":"/..."}},
+{"pid":1,"tid":1,"ph":"E","cat":"parse","ts":...,"name":"createSourceFile","args":{"path":"/..."}},
+{"pid":1,"tid":1,"ph":"X","cat":"program","ts":...,"name":"resolveModuleNamesWorker","dur":...,"args":{"containingFileName":"/..."}},
+...
+output
+cat trace/types.json
+<<output
+[{"id":1,"intrinsicName":"any","recursionId":0,"flags":["..."]},
+{"id":2,"intrinsicName":"any","recursionId":1,"flags":["..."]},
+{"id":3,"intrinsicName":"any","recursionId":2,"flags":["..."]},
+{"id":4,"intrinsicName":"error","recursionId":3,"flags":["..."]},
+{"id":5,"intrinsicName":"unresolved","recursionId":4,"flags":["..."]},
+{"id":6,"intrinsicName":"any","recursionId":5,"flags":["..."]},
+{"id":7,"intrinsicName":"intrinsic","recursionId":6,"flags":["..."]},
+{"id":8,"intrinsicName":"unknown","recursionId":7,"flags":["..."]},
+{"id":9,"intrinsicName":"unknown","recursionId":8,"flags":["..."]},
+{"id":10,"intrinsicName":"undefined","recursionId":9,"flags":["..."]},
+{"id":11,"intrinsicName":"undefined","recursionId":10,"flags":["..."]},
+{"id":12,"intrinsicName":"null","recursionId":11,"flags":["..."]},
+{"id":13,"intrinsicName":"string","recursionId":12,"flags":["..."]},
+...
+output
+```
