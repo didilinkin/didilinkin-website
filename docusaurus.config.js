@@ -17,9 +17,9 @@ const config = {
   onBrokenMarkdownLinks: "warn",
 
   // Set the production url of your site here
-  url: "https://your-docusaurus-test-site.com",
+  url: "https://didilinkin.cn",
 
-  // Set the /<baseUrl>/ pathname under which your site is served
+  // 设置 /<baseUrl>/ 为您的网站提供服务的路径名称
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: "/",
 
@@ -92,8 +92,8 @@ const config = {
           ],
         },
         blog: {
-          path: "./blog", // 路径
-          routeBasePath: "/blog",
+          // path: "./blog", // 路径
+          // routeBasePath: "/blog",
           showReadingTime: true,
           sortPosts: "descending", // 排序方向, 倒叙
           blogSidebarCount: "ALL",
@@ -118,6 +118,12 @@ const config = {
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
+        },
+        sitemap: {
+          changefreq: "weekly",
+          priority: 0.5,
+          ignorePatterns: ["/tags/**"],
+          filename: "sitemap.xml",
         },
       }),
     ],
@@ -261,7 +267,9 @@ const config = {
 
   // 主题
   // https://docusaurus.io/zh-CN/docs/using-plugins#using-themes
-  themes: ["@docusaurus/theme-live-codeblock"],
+  themes: [
+    "@docusaurus/theme-live-codeblock",
+  ],
 
   // 这个选项允许你自定义 URL/链接后是否添加末尾斜杠，以及静态 HTML 会如何被生成。
   // 类型：boolean | undefined

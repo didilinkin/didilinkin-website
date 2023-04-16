@@ -87,6 +87,7 @@ $ GIT_USER=<Your GitHub username> yarn deploy
 ### TODO
 
 * 评论功能
+* Nginx 重定向配置
 
 
 

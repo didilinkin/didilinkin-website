@@ -1,6 +1,17 @@
 {
-  "name": "init-demo",
-  "version": "0.0.0",
+  "name": "didilinkin-website",
+  "author": {
+    "name": "didilinkin",
+    "email": "didilinkin@qq.com",
+    "url": "https://didilinkin.cn/"
+  },
+  "license": "MIT",
+  "homepage": "https://didilinkin.cn/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/didilinkin/didilinkin-website.git"
+  },
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
@@ -47,6 +58,7 @@
     ]
   },
   "engines": {
-    "node": ">=16.14"
+    "node": ">=16.14",
+    "yarn": "1.22.19"
   }
 }

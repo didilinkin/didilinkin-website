@@ -1,0 +1,18 @@
+---
+sidebar_position: 30
+sidebar_label: JS 所有的假值
+description: JS 所有的假值
+title: JS 所有的假值
+---
+
+|  值  | 说明 |
+| ---- | --- |
+| false | 关键字 `false` |
+| 0 | `Number` 零值(同理 `0.0`、 `0x0`也为零) |
+| -0 | `Number` 负零值(同理 `-0.0`、 `-0x0`也为零) |
+| 0n | `BigInt`零值(`0x0n` 同理), 注意没有 `BigInt` 负零值 - `0n`的相反数还是 `0n` |
+| `""`, `''`, **\`\`** | 空字签里值 |
+| null | `null`值 - 任意值缺失 |
+| undefined | `undefined`值 - 初始值 |
+| NaN | `NaN`值 - 非数值 |
+| document.all | 当且仅当对象具有 `[[IsHTMLDDA]]` 内部插槽时, 它才是假值. 这个槽只存在于 `document.all` 中，不能用 Javascript 来设置 |

@@ -12,7 +12,7 @@ description: 使用 GitHub Actions 构建、部署 Next.js 并将其托管到 Gi
 image: ./img/updated-Main-icon@3x.webp
 ---
 
-本文是一个简单教程, 通过 `Next.js` 制作 静态网站, 然后通过 `GitHub Actions`构建打包 将其自动化部署到  `GitHub Pages`用于展示
+本文是一个简单教程, 将 `Next.js` 制作的静态网站, 通过 `GitHub Actions`构建打包，最后将其自动化部署到 `GitHub Pages`用于展示
 
 <!--truncate-->
 
@@ -22,9 +22,9 @@ image: ./img/updated-Main-icon@3x.webp
 
 ## 介绍:
 
-* [GitHub Actions](https://github.com/features/actions) 是 GitHub 的持续集成服务
+* [GitHub Actions](https://github.com/features/actions) 是 GitHub的持续集成服务
 
-* [Github Pages](https://docs.github.com/en/pages) 是 静态站点托管服务
+* [Github Pages](https://docs.github.com/en/pages) 是 GitHub的静态站点托管服务
 
 * [Next.js](https://nextjs.org/) 是 基于 React构建 服务端渲染 (SSR)应用的框架
 
@@ -223,7 +223,6 @@ jobs:
         npm run build
         touch out/.nojekyll
     - name: 部署 🚀
-      # https://github.com/JamesIves/github-pages-deploy-action
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
@@ -233,16 +232,14 @@ jobs:
 
 <br />
 
-### 2.5 VS Code开发优化
+### 2.5 VS Code 开发体验优化
 
 通过安装 VS Code官方插件 [Github Actions](https://marketplace.visualstudio.com/items?itemName=github.vscode-github-actions)来更直观的 管理工作流、查看工作流 运行历史记录并帮助 创作工作流
 
 插件配置 **注意事项**:
 
 1. 设置 `VS Code`编辑器登录 `GitHub`账号, 并且绑定
-2. 将 `remote`名称 设置为上传 GitHub的 `remote`名称
-
-  默认值: `origin`
+2. 将 `remote`名称 设置为上传 GitHub的 `remote`名称, 默认值: `origin`
 
 ![](./img/WX20230406-235756@2x.png)
 
