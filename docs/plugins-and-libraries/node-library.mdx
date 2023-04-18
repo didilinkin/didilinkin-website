@@ -1,0 +1,203 @@
+---
+sidebar_position: 2
+sidebar_label: Node 配套库
+description: Node 配套库
+title: Node 配套库
+---
+
+## Lodash
+Lodash 是一个 JavaScript 实用程序库，它提供了一组用于处理数组、对象、字符串和其他数据类型的函数
+
+Lodash 函数旨在针对性能进行高度优化，它们可以帮助提高 Node.js 应用程序的速度和效率
+
+```js
+const sum = require('lodash.sum')
+const filter = require('lodash.filter')
+
+const arr = [1, 2, 3, 4, 5];
+const sumNumber = sum(arr);
+console.log(sumNumber); // 15
+
+const data = [1, 2, 3, 4, 5];
+const filteredData = filter(data, num => num % 2 === 0);
+console.log(filteredData); // Output: [2, 4]
+```
+
+<br />
+
+## Node-cache
+Node-cache 是一个缓存库，使开发人员能够在 Node.js 应用程序中缓存数据
+
+缓存有助于减少数据库查询和 API 调用的次数，从而提高应用程序性能
+
+```js
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 60 });
+cache.set('key', 'value');
+const value = cache.get('key');
+console.log(value); // 'value'
+```
+
+<br />
+
+## Day.js
+Moment.js 的 2kB 轻量化方案，拥有同样强大的 API
+
+Day.js 是一个轻量的处理时间和日期的 JavaScript 库，和 Moment.js 的 API 设计保持完全一样
+
+```js
+dayjs().format()
+// 默认返回的是 ISO8601 格式字符串 '2020-04-02T08:02:17-05:00'
+
+dayjs('2019-01-25').format('[YYYYescape] YYYY-MM-DDTHH:mm:ssZ[Z]')
+// 'YYYYescape 2019-01-25T00:00:00-02:00Z'
+
+dayjs('2019-01-25').format('DD/MM/YYYY') // '25/01/2019'
+```
+
+<br />
+
+## Redis
+Redis 是一种开源内存数据结构存储，可用作数据库、缓存和消息代理
+
+Redis 可以通过实现快速数据检索和存储来帮助提高应用程序性能
+
+```js
+const redis = require('redis');
+const client = redis.createClient();
+client.set('key', 'value');
+client.get('key', function (err, value) {
+  console.log(value); // 'value'
+});
+```
+
+## Nodemailer
+Nodemailer 是 Node.js 应用程序的一个模块, 使开发人员能够发送电子邮件
+
+Nodemailer 使从 Node.js 应用程序发送电子邮件变得更加容易和高效
+
+```js
+const nodemailer = require('nodemailer');
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'your-email@gmail.com',
+    pass: 'your-password'
+  }
+});
+const mailOptions = {
+  from: 'your-email@gmail.com',
+  to: 'recipient-email@gmail.com',
+  subject: 'Test email',
+  text: 'This is a test email'
+};
+transporter.sendMail(mailOptions, function (error, info) {
+  if (error) {
+    console.log(error);
+  } else {
+    console.log('Email sent: ' + info.response);
+  }
+});
+```
+
+## Sharp
+Sharp 是用于 Node.js 应用程序的高性能图像处理库
+Sharp 可用于实时调整大小、裁剪和操作图像，这有助于提高应用程序性能
+
+```js
+const sharp = require('sharp');
+sharp('input.jpg')
+  .resize(200, 200)
+  .toFile('output.jpg', function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Image resized and saved');
+    }
+  });
+```
+
+<br />
+
+## Morgan
+Morgan 是一个流行的 Node.js 应用程序日志记录中间件
+
+Morgan 可用于记录 HTTP 请求和响应，这可以帮助开发人员调试和优化他们的应用程序
+
+```js
+const express = require('express');
+const morgan = require('morgan');
+const app = express();
+app.use(morgan('combined'));
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
+app.listen(3000, () => {
+  console.log('Server started on port 3000');
+});
+```
+
+
+## Node-gzip
+
+Node-gzip 是一个用于在 Node.js 应用程序中压缩和解压缩数据的模块
+
+压缩可以通过减少通过网络发送的数据大小来帮助提高应用程序性能
+
+```js
+const zlib = require('zlib');
+const input = 'Lorem ipsum dolor sit amet';
+zlib.gzip(input, function (err, compressed) {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log('Compressed data: ' + compressed.toString('base64'));
+    zlib.gunzip(compressed, function (err, decompressed) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log('Decompressed data: ' + decompressed.toString());
+      }
+    });
+  }
+});
+```
+
+## Bcrypt
+
+Bcrypt 是 Node.js 应用程序中用于散列密码的流行模块
+
+散列密码有助于提高应用程序安全性和保护用户数据
+
+```js
+const bcrypt = require('bcrypt');
+const password = 'mypassword';
+bcrypt.hash(password, 10, function (err, hash) {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log('Hashed password: ' + hash);
+    bcrypt.compare(password, hash, function (err, result) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log('Password match: ' + result);
+      }
+    });
+  }
+});
+```
+
+<br />
+
+## fs-extra
+
+fs-extra让Node.js文件操作文件更人性化, fs-extra提供以同步方式 新建，复制，移动，删除，修改，写入 文件和文件夹的方法
+
+
+<br />
+
+## 参考链接
+
+* [10大 Node.js 库可以帮助你优化代码和简化开发](https://mp.weixin.qq.com/s/QENs40MwDo7rV0hyhlHzbg)
+* [令人极度舒适的 Node.js 包和资源列表](https://zhuanlan.zhihu.com/p/385852664)

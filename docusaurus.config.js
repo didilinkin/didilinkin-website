@@ -148,10 +148,10 @@ const config = {
 
       algolia: {
         // Algolia 提供的应用 ID
-        appId: "YOUR_APP_ID",
+        appId: "LEJTB92EOP",
         //  公开 API 密钥：提交它没有危险
-        apiKey: "YOUR_SEARCH_API_KEY",
-        indexName: "YOUR_INDEX_NAME",
+        apiKey: "73d7e9e6316918fbe3cc4c218e360f03",
+        indexName: "didilinkin",
         // 可选：见下文
         contextualSearch: true,
         // 可选：声明哪些域名需要用 window.location 型的导航而不是 history.push
@@ -261,15 +261,14 @@ const config = {
           "yaml",
           "bash",
           "git",
+          "typescript",
         ],
       },
     }),
 
   // 主题
   // https://docusaurus.io/zh-CN/docs/using-plugins#using-themes
-  themes: [
-    "@docusaurus/theme-live-codeblock",
-  ],
+  themes: ["@docusaurus/theme-live-codeblock"],
 
   // 这个选项允许你自定义 URL/链接后是否添加末尾斜杠，以及静态 HTML 会如何被生成。
   // 类型：boolean | undefined

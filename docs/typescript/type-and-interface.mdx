@@ -1,0 +1,104 @@
+---
+sidebar_position: 1
+sidebar_label: Type 和 Interface的区别
+description: Type 和 Interface的区别
+title: Type 和 Interface的区别
+---
+
+> [原文链接-type 和 interface的区别知多少?](https://mp.weixin.qq.com/s/Pe3kzy_BnaVND5YSPA0Xvw)
+
+在typescript里面, 有两个概念十分容易混淆, 那便是 `type` 和 `interface`, 它俩都可以用来表示 接口，但是实际使用上会存在一些差异
+
+## 相同点
+
+在我看来，它俩就是对 接口定义 的两种不同形式，目的都是一样的，都是用来定义 `对象` 或者 `函数` 的形状，示例如下
+
+```ts
+interface example {
+  name: string
+  age: number
+}
+interface exampleFunc {
+  (name:string,age:number): void
+}
+
+
+type example = {
+  name: string
+  age: number
+}
+type example = (name:string,age:number) => void
+
+```
+
+它俩也支持 `继承`，并且不是独立的，而是可以 互相 继承，只是具体的形式稍有差别
+
+```ts
+type exampleType1 = {
+  name: string
+}
+interface exampleInterface1 {
+  name: string
+}
+
+
+type exampleType2 = exampleType1 & {
+  age: number
+}
+type exampleType2 = exampleInterface1 & {
+  age: number
+}
+interface exampleInterface2 extends exampleType1 {
+  age: number
+}
+interface exampleInterface2 extends exampleInterface1 {
+  age: number
+}
+```
+
+可以看到对于 `interface` 来说, 继承是通过 `extends` 实现的
+
+而 `type` 的话是通过 `&` 来实现的，也可以叫做 `交叉类型`
+
+<br />
+
+## 不同点
+
+### type可以做到, 但 interface不能做到的事情
+
+1. type可以定义 基本类型的别名，如 `type myString = string`
+2. type可以通过 typeof 操作符来定义，如 `type myType = typeof someObj`
+3. type可以申明 联合类型，如 `type unionType = myType1 | myType2`
+4. type可以申明 元组类型，如 `type yuanzu = [myType1, myType2]`
+
+### interface可以做到, 但是type不可以做到的事情
+
+* interface可以 声明合并，示例如下
+
+```ts
+interface test {
+  name: string
+}
+interface test {
+  age: number
+}
+
+/*
+test实际为 {
+  name: string
+  age: number
+}
+*/
+
+// 这种情况下，如果是 type的话，就会是 覆盖 的效果，始终只有最后一个 type生效
+```
+
+<br />
+
+## 总结
+其实在typescript里, 还有很多容易搞混淆的概念, 如 `extends` 和 `implements` 等，还有一些高级概念，如 `泛型`
+
+这些都是在ts里必知必会的东西, 因此一定要细抠这些知识点
+
+## 参考链接
+* [type 和 interface 傻傻分不清楚?](https://mp.weixin.qq.com/s/C-n1vkfv2pATT2fjdNLjmQ)
