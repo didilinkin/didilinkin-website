@@ -273,7 +273,7 @@ const config = {
   // 这个选项允许你自定义 URL/链接后是否添加末尾斜杠，以及静态 HTML 会如何被生成。
   // 类型：boolean | undefined
   // https://docusaurus.io/zh-CN/docs/api/docusaurus-config#trailingSlash
-  trailingSlash: false,
+  // trailingSlash: false,
 
   stylesheets: [
     // {
