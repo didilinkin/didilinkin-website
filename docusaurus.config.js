@@ -151,9 +151,7 @@ const config = {
         appId: "VLDY0NMJL7",
         //  公开 API 密钥：提交它没有危险
         apiKey: "e2c5226bd3db05e06e8f6cc22b142c5f", // Search-Only API Key
-        indexName: "didilinkin",
-        // 可选：见下文
-        contextualSearch: true,
+        indexName: "didilinkin-website",
       },
 
       navbar: {
