@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Sleep for 2 minutes
-        run: sleep 120s
+      - name: Sleep for 10 seconds
+        run: sleep 10s
         shell: bash
 
       - name: Checkout repo
