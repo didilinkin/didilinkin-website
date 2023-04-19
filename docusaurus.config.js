@@ -150,26 +150,10 @@ const config = {
         // Algolia 提供的应用 ID
         appId: "LEJTB92EOP",
         //  公开 API 密钥：提交它没有危险
-        apiKey: "73d7e9e6316918fbe3cc4c218e360f03",
+        apiKey: "9e24a416772ac47fef786c9e2d66726d", // Search-Only API Key
         indexName: "didilinkin",
         // 可选：见下文
         contextualSearch: true,
-        // 可选：声明哪些域名需要用 window.location 型的导航而不是 history.push
-        // 适用于 Algolia 配置会爬取多个文档站点，而我们想要用 window.location.href 在它们之间跳转时。
-        externalUrlRegex: "external\\.com|domain\\.com",
-        // 可选：替换来自 Algolia 的部分项目 URL。
-        // 当对使用不同 baseUrl 的多个部署使用相同的搜索索引时很有用。
-        // 您可以在 `from` 参数中使用正则表达式或字符串。
-        // 例如：localhost:3000 与 myCompany.com/docs
-        replaceSearchResultPathname: {
-          from: "/docs", // or as RegExp: /\/docs\//
-          to: "/",
-        },
-        // Optional: Algolia search parameters
-        searchParameters: {},
-        // Optional: path for search page that enabled by default (`false` to disable it)
-        searchPagePath: "search",
-        //... other Algolia params
       },
 
       navbar: {
