@@ -1,0 +1,102 @@
+---
+sidebar_position: 1
+sidebar_label: Nginx 基本配置
+description: Nginx 基本配置
+title: Nginx 基本配置
+---
+
+> [Nginx 官方文档](https://docs.nginx.com/nginx/admin-guide/web-server/web-server/)
+
+## 常用命令
+```bash
+# 重新加载配置
+service nginx reload
+
+# Nginx 重启
+nginx -s reload
+service nginx restart
+
+# nginx 配置语法检查
+nginx -t
+
+# 查看错误日志
+cat /var/log/nginx/error.log
+```
+
+## 功能类型
+
+### 匹配
+* [一文弄懂Nginx的location匹配](https://segmentfault.com/a/1190000013267839)
+
+### `rewrite` 功能
+
+* [第七章: Nginx的rewrite规则详解](https://www.jianshu.com/p/3b2345f7347d)
+
+<br />
+
+### `resolver` 功能
+
+:::info
+
+当`error.log`提示 `no resolver defined to resolve`错误
+
+说明 反向代理功能内部需要指定 DNS解析服务
+
+添加一个 `可访问`的 DNS服务即可 (国外DNS服务 国内无法使用)
+
+:::
+
+* [国内外 比较不错的DNS服务推荐](https://zhuanlan.zhihu.com/p/53958870)
+* [解决nginx no resolver defined to resolve..问题](https://www.jianshu.com/p/396679e1f47c)
+* [Nginx解决“no resolver defined to resolve xxx.xxx”](https://developer.aliyun.com/article/486252)
+
+
+
+<br />
+
+### `location 正则表达式 匹配` 功能
+
+* [nginx 常见正则匹配符号表示](https://www.cnblogs.com/netsa/p/6383094.html)
+* [Nginx——location匹配与在配置中的优先级](https://www.cnblogs.com/zjfjava/p/10760157.html)
+* [Location 匹配优先级](https://segmentfault.com/a/1190000020885269)
+
+
+<br />
+
+### `listen`功能
+
+* [了解Nginx'listen'指令的不同值](https://www.it-swarm.cn/zh/nginx/%E4%BA%86%E8%A7%A3nginx%27listen%27%E6%8C%87%E4%BB%A4%E7%9A%84%E4%B8%8D%E5%90%8C%E5%80%BC/960103016/)
+
+
+<br />
+
+### `autoindex` 功能
+
+* `autoindex off` 禁止目录访问
+
+
+
+
+
+
+
+
+<br />
+
+## 常用文件地址
+
+* 错误日志地址
+  * `/var/log/nginx/error.log`
+* 配置文件地址
+  * `/etc/nginx/nginx.conf`
+
+
+<br />
+
+## 常见问题汇总
+
+* [nginx配置文件中 $request_uri 到底是指的url里哪部分](https://blog.csdn.net/cn_yaojin/article/details/80334604)
+
+* [Nginx反向代理遇到的问题](https://www.jianshu.com/p/2b67e0e746d6)
+
+* [Centos7.3 卸载 Nginx (彻底卸载) 并重新安装 Nginx (RPM源yum安装)](https://cloud.tencent.com/developer/article/1801077)
