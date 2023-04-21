@@ -45,12 +45,12 @@ jobs:
           WELCOME: "ssh scp ssh pipelines"
           LASTSSH: "Doing something after copying"
         with:
-          host: ${{ secrets.SERVER_ADDRESS }} # USER_HOST
-          user: ${{ secrets.SERVER_USERNAME }} # USER_NAME
-          pass: ${{ secrets.SERVER_PASSWORD }} # USER_PASS
+          host: ${{ secrets.SERVER_ADDRESS }}
+          user: ${{ secrets.SERVER_USERNAME }}
+          pass: ${{ secrets.SERVER_PASSWORD }}
           connect_timeout: 10s
           local: './build/*'
-          remote: '/root/www/prod/home_page/html' # /home/www/dist
+          remote: '/root/www/prod/home_page/html'
 
       - name: 让 Nginx重启, 部署完成 🎊
         uses: appleboy/ssh-action@master
