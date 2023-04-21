@@ -48,12 +48,35 @@ jobs:
       #     CI: true
 
       # 使用 SSH
-      - name: 上传文件到远程服务器部署 🚀
-        uses: zhenyuWang/Upload-File-Action@v1.0.1
+      # - name: 上传文件到远程服务器部署 🚀
+      #   uses: zhenyuWang/Upload-File-Action@v1.0.1
+      #   with:
+      #     username: ${{ secrets.SERVER_USERNAME }} # 登录远程服务器的用户名
+      #     server: ${{ secrets.SERVER_ADDRESS }} # 远程服务器 IP
+      #     port: "22"
+      #     ssh_private_key: ${{ secrets.SERVER_SSH_PRIVATE_KEY}}
+      #     local_path: "./build/"
+      #     target_path: "/root/www/prod/home_page/html2" # 远程服务器目标路径:  "/usr/local/nginx/html/xxx"
+
+      - name: Deploy 🚀
+        # 因为构建之后，需要把代码上传到服务器上，所以需要连接到ssh，并且做一个拷贝操作
+        uses: cross-the-world/scp-pipeline@master
+        env:
+          WELCOME: "ssh scp ssh pipelines"
+          LASTSSH: "Doing something after copying"
         with:
-          username: ${{ secrets.SERVER_USERNAME }} # 登录远程服务器的用户名
-          server: ${{ secrets.SERVER_ADDRESS }} # 远程服务器 IP
-          port: "22"
-          ssh_private_key: ${{ secrets.SERVER_SSH_PRIVATE_KEY}}
-          local_path: "./build/" # 要上传文件所在目录
-          target_path: "/root/www/prod/home_page/html2" # 远程服务器目标路径
+          host: ${{ secrets.SERVER_ADDRESS }} # USER_HOST
+          user: ${{ secrets.SERVER_USERNAME }} # USER_NAME
+          pass: ${{ secrets.SERVER_PASSWORD }} # USER_PASS
+          connect_timeout: 10s
+          local: './build/*'
+          remote: '/root/www/prod/home_page/html2' # /home/www/dist
+
+      - name: 让 Nginx重启
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_ADDRESS }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            sudo service nginx restart
