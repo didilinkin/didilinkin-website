@@ -5,11 +5,9 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [18]
-
     steps:
       - name: 获取源码  🛎️
         uses: actions/checkout@v3
@@ -21,44 +19,26 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      # - run: npm install
-      # - run: npm run build --if-present
       - name: 使用 Yarn 安装依赖 ⚙️
         uses: borales/actions-yarn@v4
         with:
           cmd: install # will run `yarn install` command
-        # env:
-        #   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # if needed
 
       - name: 使用 Yarn 打包 📦
         uses: borales/actions-yarn@v4
         with:
           cmd: build # will run `yarn build:prod` command
 
-      # 使用 FTP方式:
-      # - name: FTP Deploy
-      #   uses: SamKirkland/FTP-Deploy-Action@4.0.0
-      #   with:
-      #     server: byu7172490001.my3w.com
-      #     username: ${{ secrets.ftp_user }}
-      #     password: ${{ secrets.ftp_pwd }}
-      #     local-dir: ./build/
-      #     server-dir: ./htdocs/
-      #   env:
-      #     CI: true
+      - name: 清空 部署目录文件夹 🧹
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_ADDRESS }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            sudo rm -rf /root/www/prod/home_page/html/*
 
-      # 使用 SSH
-      # - name: 上传文件到远程服务器部署 🚀
-      #   uses: zhenyuWang/Upload-File-Action@v1.0.1
-      #   with:
-      #     username: ${{ secrets.SERVER_USERNAME }} # 登录远程服务器的用户名
-      #     server: ${{ secrets.SERVER_ADDRESS }} # 远程服务器 IP
-      #     port: "22"
-      #     ssh_private_key: ${{ secrets.SERVER_SSH_PRIVATE_KEY}}
-      #     local_path: "./build/"
-      #     target_path: "/root/www/prod/home_page/html2" # 远程服务器目标路径:  "/usr/local/nginx/html/xxx"
-
-      - name: Deploy 🚀
+      - name: 进行部署 🚀
         # 因为构建之后，需要把代码上传到服务器上，所以需要连接到ssh，并且做一个拷贝操作
         uses: cross-the-world/scp-pipeline@master
         env:
@@ -70,9 +50,9 @@ jobs:
           pass: ${{ secrets.SERVER_PASSWORD }} # USER_PASS
           connect_timeout: 10s
           local: './build/*'
-          remote: '/root/www/prod/home_page/html2' # /home/www/dist
+          remote: '/root/www/prod/home_page/html' # /home/www/dist
 
-      - name: 让 Nginx重启
+      - name: 让 Nginx重启, 部署完成 🎊
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_ADDRESS }}
