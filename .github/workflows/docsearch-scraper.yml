@@ -1,4 +1,4 @@
-name: 运行 docsearch-scraper
+name: 索引爬虫 docsearch-scraper
 
 on:
   push:
