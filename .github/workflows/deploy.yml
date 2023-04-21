@@ -1,0 +1,59 @@
+name: Deploy CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18]
+
+    steps:
+      - name: 获取源码  🛎️
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: 设置 Node 🗜️. Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # - run: npm install
+      # - run: npm run build --if-present
+      - name: 使用 Yarn 安装依赖 ⚙️
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install # will run `yarn install` command
+        # env:
+        #   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # if needed
+
+      - name: 使用 Yarn 打包 📦
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build # will run `yarn build:prod` command
+
+      # 使用 FTP方式:
+      # - name: FTP Deploy
+      #   uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      #   with:
+      #     server: byu7172490001.my3w.com
+      #     username: ${{ secrets.ftp_user }}
+      #     password: ${{ secrets.ftp_pwd }}
+      #     local-dir: ./build/
+      #     server-dir: ./htdocs/
+      #   env:
+      #     CI: true
+
+      # 使用 SSH
+      - name: 上传文件到远程服务器部署 🚀
+        uses: zhenyuWang/Upload-File-Action@v1.0.1
+        with:
+          username: ${{ secrets.SERVER_USERNAME }} # 登录远程服务器的用户名
+          server: ${{ secrets.SERVER_ADDRESS }} # 远程服务器 IP
+          port: "22"
+          ssh_private_key: ${{ secrets.SERVER_SSH_PRIVATE_KEY}}
+          local_path: "./build/" # 要上传文件所在目录
+          target_path: "/root/www/prod/home_page/html2" # 远程服务器目标路径

@@ -154,6 +154,19 @@ const config = {
         indexName: "didilinkin-website",
       },
 
+      // SEO
+      metadata: [
+        {
+          name: "keywords",
+          content: "哈希肯, didilinkin, didilinkin-website, didilinkin-blog",
+        },
+        {
+          name: "description",
+          content:
+            "哈希肯 didilinkin 的个人主页. Personal blog and Documentation about full-stack development.",
+        },
+      ],
+
       navbar: {
         title: "哈希肯",
         // https://docusaurus.io/zh-CN/docs/api/themes/configuration#navbar-logo
@@ -187,9 +200,17 @@ const config = {
           // { to: "/about", label: "关于", position: "right" },
           { type: "localeDropdown", position: "right" },
           {
+            // label: "GitHub",
             href: "https://github.com/didilinkin",
-            label: "GitHub",
             position: "right",
+            "aria-label": "GitHub repository",
+            "uk-icon": "github",
+          },
+          {
+            href: "https://didilinkin.cn/blog/rss.xml",
+            position: "right",
+            "aria-label": "RSS",
+            "uk-icon": "rss",
           },
         ],
       },

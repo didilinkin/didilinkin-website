@@ -87,9 +87,10 @@ $ GIT_USER=<Your GitHub username> yarn deploy
 ### TODO
 
 * 评论功能
-* Nginx 重定向配置
-
-
+* [前端性能监控](https://cloud.tencent.com/document/product/1464/58553)
+  * 参考 [xiaohai.wiki](https://xiaohai.wiki/blog) 项目源码 - `docusaurus.config.js`
+* 云服务器 FTP配置
+  * [阿里云服务器配置FTP](https://www.jianshu.com/p/c1639416fc73)
 
 
 
