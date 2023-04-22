@@ -60,3 +60,12 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             sudo service nginx restart
+
+      - name: 发送邮件 通知完成 📧
+        env:
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+        run: node send_email.js
