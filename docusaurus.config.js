@@ -288,6 +288,7 @@ const config = {
     //   crossorigin: "anonymous",
     // },
     "/uikit/uikit.min.css",
+    "/sweetalert2/sweetalert2.min.css",
   ],
 
   scripts: [
@@ -295,6 +296,7 @@ const config = {
     // "/aegis/init-script.js",
     "/uikit/uikit.min.js",
     "/uikit/uikit-icons.min.js",
+    "/sweetalert2/sweetalert2.min.js",
   ],
 }
 

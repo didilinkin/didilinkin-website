@@ -86,15 +86,18 @@ $ GIT_USER=<Your GitHub username> yarn deploy
 
 ### TODO
 
-* 评论功能
-* [前端性能监控](https://cloud.tencent.com/document/product/1464/58553)
+- [ ] 评论功能
+  * [giscus](https://giscus.app/zh-CN) - [参考项目](https://zxuqian.cn/resources/)
+
+- [ ] [前端性能监控](https://cloud.tencent.com/document/product/1464/58553)
   * 参考 [xiaohai.wiki](https://xiaohai.wiki/blog) 项目源码 - `docusaurus.config.js`
-* 云服务器 FTP配置
-  * [阿里云服务器配置FTP](https://www.jianshu.com/p/c1639416fc73)
+
+- [x] 云服务器 部署
+  * [GitHub Actions自动化部署前端项目指南](https://juejin.cn/post/7031036097735950367)
 
 
 
 
 ### 依赖内容
 
-[getuikit - CSS框架](https://getuikit.com/)
+[UIkit - CSS框架](https://getuikit.com/)
