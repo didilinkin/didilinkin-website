@@ -1,0 +1,5 @@
+{
+  "github-actions.workflows.pinned.refresh.enabled": true,
+  "github-actions.remote-name": "origin",
+  "github-actions.workflows.pinned.workflows": []
+}
