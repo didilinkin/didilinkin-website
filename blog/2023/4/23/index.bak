@@ -1,0 +1,12 @@
+---
+title: 用 GitHub Action部署阿里云并发邮件提醒
+authors: [didilinkin]
+tags: [
+  github actions,
+  cicd,
+  阿里云,
+  部署
+]
+slug: github actions
+description: 用 GitHub Action部署阿里云并发邮件提醒
+---
