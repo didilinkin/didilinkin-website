@@ -2,9 +2,10 @@
 title: 在 Docusaurus v2 中使用 Algolia DocSearch搜索功能
 authors: [didilinkin]
 tags: [
-  github actions,
-  algolia,
-  docusaurus-2,
+  GitHub Actions,
+  Algolia,
+  Docsearch,
+  Docusaurus-2,
 ]
 slug: algoliasearch
 description: 在 Docusaurus v2 中使用 Algolia DocSearch搜索功能
@@ -17,7 +18,9 @@ description: 在 Docusaurus v2 中使用 Algolia DocSearch搜索功能
 
 Algolia 是一个搜索、推荐服务平台，可以通过简单的配置来为站点添加全文检索功能
 
-基本原理：通过爬虫对目标网站的内容创建 Records (记录), 在用户搜索时调用接口返回相关内容
+基本原理：
+
+通过爬虫对目标网站的内容创建 Records (记录), 在用户搜索时调用接口返回相关内容
 
 <br />
 
@@ -31,11 +34,11 @@ Algolia 是一个搜索、推荐服务平台，可以通过简单的配置来为
 
 ## 一. 需求描述
 
-  为网站添加 实时搜索功能的方案, 采用 Docusaurus官方支持 [Algolia DocSearch方案](https://docsearch.algolia.com/)
+  为网站添加 实时搜索, 采用 Docusaurus2 官方支持的 [Algolia DocSearch](https://docsearch.algolia.com/)
 
-  *Docsearch* 每周一次爬取你的网站 (可以在网页界面上配置具体时间), 并将所有内容汇总到一个 *Algolia* 索引中
+  *Docsearch* 每周一次爬取网站 (可在网页界面上配置具体时间), 并将所有内容汇总到一个 *Algolia* 索引中
 
-  随后，前端会调用 *Algolia API* 来直接查询这些内容
+  随后，前端页面会调用 *Algolia API* 来直接查询这些内容
 
   > [Docusaurus 搜索功能文档](https://docusaurus.io/zh-CN/docs/search#using-algolia-docsearch)
 
@@ -50,7 +53,7 @@ Algolia 是一个搜索、推荐服务平台，可以通过简单的配置来为
   * 准备项目域名地址 - 本案例: [https://didilinkin.cn/](https://didilinkin.cn/)
 
     :::note
-    > 如果没有 服务器和域名 也可用 *GitHub Pages*
+    > 如没有 服务器和域名 也可用 *GitHub Pages*
     ![](./img/wx-github-pages.png)
     :::
 
@@ -92,7 +95,7 @@ Algolia 是一个搜索、推荐服务平台，可以通过简单的配置来为
 
 ![](./img/wx-settings.png)
 
-找到 接下来本地配置需要的数据位置
+找到 接下来本地配置需要的数据
 
 ![](./img/wx-api-keys.png)
 
@@ -116,6 +119,7 @@ Algolia 是一个搜索、推荐服务平台，可以通过简单的配置来为
   module.exports = {
     // ...
     presets: [[
+      // ...
       "classic",
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
@@ -129,6 +133,7 @@ Algolia 是一个搜索、推荐服务平台，可以通过简单的配置来为
         },
       })
     ]],
+    // ...
     themeConfig: {
       // ...
       algolia: {
@@ -148,7 +153,13 @@ Algolia 是一个搜索、推荐服务平台，可以通过简单的配置来为
 
 * *docsearch-config.json* (爬虫配置文件)
 
-  > 需要修改3处: *index_name*, *start_urls* 和 *sitemap_urls*
+  > 需修改3处:
+  >
+  > * *index_name*
+  >
+  > * *start_urls*
+  >
+  > * *sitemap_urls*
 
   ```json
   {
@@ -211,7 +222,7 @@ Algolia 是一个搜索、推荐服务平台，可以通过简单的配置来为
 
 ## 四. 执行爬虫程序 - docsearch-scraper
 
-> 以下两种 爬虫方式任选其一即可 (推荐使用 *GitHub Action*)
+> 以下两种 爬虫方式任选其一即可 (推荐使用 *GitHub Actions*)
 
 <br />
 
@@ -220,7 +231,8 @@ Algolia 是一个搜索、推荐服务平台，可以通过简单的配置来为
 前置条件:
   * Docker
   * jq - 轻量级命令行 JSON 处理器
-      > [使用 brew 安装最新版的 jq](https://github.com/stedolan/jq/wiki/Installation#zero-install)
+
+    > [使用 brew 安装最新版的 jq](https://github.com/stedolan/jq/wiki/Installation#zero-install)
 
   <br />
 
@@ -249,7 +261,7 @@ Algolia 是一个搜索、推荐服务平台，可以通过简单的配置来为
 
 <br />
 
-### 2. GitHub Action 执行爬虫
+### 2. GitHub Actions 执行爬虫
 
 在 `.github/workflows/` 文件夹下 创建 *docsearch-scraper.yml*, 用来定义 GitHub Actions 工作流
 
@@ -293,7 +305,7 @@ jobs:
 
   * *APPLICATION_ID*
 
-  * *API_KEY* —— Admin API Key
+  * *API_KEY* — Admin API Key
 
   ![](./img/wx20230425-110102.png)
 
@@ -319,7 +331,7 @@ jobs:
     * docusaurus.config.js - `indexName`
     * Algolia 官网 的项目名称 - `Application`
 
-    比如设为: *didilinkin-website*
+    如: *didilinkin-website*
 
 
 <br />
@@ -387,7 +399,7 @@ jobs:
 * 本地执行 爬虫脚本, 报错: *Error: { cli } was removed in winston@3.0.0.*
 
   ```bash
-  # 查看本地的 全局依赖是否存在 *jq* (yarn)
+  # 查看本地的 全局依赖是否存在 jq (yarn)
   yarn global list --depth=0
 
   # 删除 jq依赖
@@ -398,7 +410,7 @@ jobs:
 
 * 本地执行 爬虫脚本, 报错: *zsh: command not found: jq*
 
-  > 确保清理本地 npm, yarn, pnpm的全局依赖中没有 *jq*
+  > 确保本地 *npm*, *yarn*, *pnpm* 的全局依赖中没有 *jq*, 使用 *brew*安装
 
   ```bash
   # 安装最新版 jq
