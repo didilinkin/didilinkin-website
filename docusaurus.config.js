@@ -287,16 +287,17 @@ const config = {
     //     "sha384-Um5gpz1odJg5Z4HAmzPtgZKdTBHZdw8S29IecapCSB31ligYPhHQZMIlWLYQGVoc",
     //   crossorigin: "anonymous",
     // },
-    "/uikit/uikit.min.css",
-    "/sweetalert2/sweetalert2.min.css",
+    //
+    "https://cdn.staticfile.org/uikit/3.16.17/css/uikit.min.css",
+    "https://cdn.staticfile.org/sweetalert2/11.7.5/sweetalert2.min.css",
   ],
 
   scripts: [
     // "https://cdn-go.cn/aegis/aegis-sdk/latest/aegis.min.js",
     // "/aegis/init-script.js",
-    "/uikit/uikit.min.js",
-    "/uikit/uikit-icons.min.js",
-    "/sweetalert2/sweetalert2.min.js",
+    "https://cdn.staticfile.org/uikit/3.16.17/js/uikit.min.js",
+    "https://cdn.staticfile.org/uikit/3.16.17/js/uikit-icons.min.js",
+    "https://cdn.staticfile.org/sweetalert2/11.7.5/sweetalert2.min.js",
   ],
 }
 

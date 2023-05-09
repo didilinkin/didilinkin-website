@@ -1,0 +1,31 @@
+---
+title: 使用 Caddy 来给网站配置 HTTPS
+authors: [didilinkin]
+tags: [
+  Caddy,
+  HTTPS,
+]
+slug: caddy
+description: 使用 Caddy 来给网站配置 HTTPS
+---
+
+## Caddy 常用命令
+
+```bash
+# 通过配置文件 Caddyfile 运行 Caddy程序
+caddy run --config Caddyfile
+
+# 停止 Caddy
+caddy stop
+```
+
+## Caddyfile 文件配置
+
+```bash
+html.didilinkin.top {
+        reverse_proxy localhost:8081
+        tls {
+                on_demand
+        }
+}
+```
