@@ -101,3 +101,15 @@ $ GIT_USER=<Your GitHub username> yarn deploy
 ### 依赖内容
 
 [UIkit - CSS框架](https://getuikit.com/)
+
+### 性能优化
+> [参考文章 - 博客性能优化](https://www.codingtour.com/posts/blog-performance/)
+
+* 图片压缩
+* 图片懒加载
+* 去除不必要的功能
+* 按需加载JS - defer
+* 缓存 TTL
+* 开启资源压缩 (gzip, deflate 或 brotli)
+  启用 `brotli`压缩 (在 nginx配置)
+* 启用 HTTP/2
