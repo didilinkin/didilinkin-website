@@ -296,14 +296,6 @@ const config = {
     // "https://cdn-go.cn/aegis/aegis-sdk/latest/aegis.min.js",
     // "/aegis/init-script.js",
     {
-      src: "https://cdn.staticfile.org/uikit/3.16.17/js/uikit.min.js",
-      defer: true,
-    },
-    {
-      src: "https://cdn.staticfile.org/uikit/3.16.17/js/uikit-icons.min.js",
-      defer: true,
-    },
-    {
       src: "https://cdn.staticfile.org/sweetalert2/11.7.5/sweetalert2.min.js",
       defer: true,
     },
