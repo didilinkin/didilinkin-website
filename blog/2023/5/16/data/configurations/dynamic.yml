@@ -1,0 +1,71 @@
+# Dynamic configuration
+http:
+  routers:
+    # 首页配置
+    home:
+      service: kong-service
+      middlewares:
+      rule: "Host(`didilinkin.cn`)"
+    # Traefik 控制面板
+    dashboard:
+      service: api@internal
+      middlewares:
+        - "user-auth"
+      rule: "Host(`dash.didilinkin.cn`)"
+    # Kong
+    kong:
+      service: kong-service
+      middlewares:
+      rule: "Host(`kong.didilinkin.cn`)"
+
+    # Proxy
+    proxy:
+      service: proxy-service
+      rule: "Host(`clashx.didilinkin.cn`)"
+
+  middlewares:
+    secureHeaders:
+      headers:
+        sslRedirect: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+
+    # UserName : admin -> didilinkin
+    # Password : qwer1234 -> 三级密码～
+    user-auth:
+      basicAuth:
+        users:
+          # - "admin:$apr1$tm53ra6x$FntXd6jcvxYM/YH0P2hcc1"
+          - "didilinkin:$2y$10$DTvlzREp79mOVoHTn2EJxeISCPoaQIpAoQ.IXMCJ9Xt9rs4MemSVm"
+
+  services:
+    kong-service:
+      loadBalancer:
+        servers:
+          # 需要 docker安装 kong 后, 找 这俩的IP替换下面的 [ip-address-of-kong]
+          - url: "http://172.18.0.3:8000"
+
+    # ClashX 配置转发 - 会报错
+    # proxy-service:
+    #   loadBalancer:
+    #     servers:
+    #       - url: "https://mojie.best"
+    #   passHostHeader: true
+    #   middlewares:
+    #     - secureHeaders
+    #   healthCheck:
+    #     path: "/api/v1/client/subscribe?token=8dafe5af82c7e845da8a0fc8f92adbe6"
+
+tls:
+  options:
+    default:
+      cipherSuites:
+        - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+      minVersion: VersionTLS12

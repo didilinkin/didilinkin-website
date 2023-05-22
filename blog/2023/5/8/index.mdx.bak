@@ -29,3 +29,44 @@ html.didilinkin.top {
         }
 }
 ```
+
+
+
+
+
+---------------- 测试流程
+
+
+
+
+
+
+这个 Caddyfile 配置与之前的配置类似，也是将域名 html.didilinkin.top 反向代理到本地的 127.0.0.1:8081 地址，并且启用了 on-demand TLS。
+
+如果你想要通过浏览器访问 html.didilinkin.top，可以执行以下步骤：
+
+确保你已经将域名 html.didilinkin.top 解析到了你的服务器 IP 地址上。你可以使用 nslookup 或者 dig 命令来查询域名解析结果，例如：
+
+Copy
+nslookup html.didilinkin.top
+```
+
+如果查询结果中包含了你的服务器 IP 地址，那么域名解析已经生效。
+
+确保你已经启动了监听 127.0.0.1:8081 地址的 HTTP 服务，并且该服务已经能够正常响应。你可以使用浏览器或者 curl 命令来测试 HTTP 服务是否正常。
+
+启动 Caddy。你可以使用以下命令来启动 Caddy：
+
+Copy
+sudo caddy run
+这个命令会启动 Caddy，并且根据 Caddyfile 配置文件中的设置来配置 Caddy 的行为。
+
+通过浏览器访问 https://html.didilinkin.top。由于启用了 on-demand TLS，Caddy 会自动向 Let's Encrypt 申请证书，并在证书获得之后才会建立 TLS 连接。因此，第一次访问时可能会比较慢，需要等待一段时间。
+
+如果以上步骤都执行正确，你应该能够通过浏览器访问 https://html.didilinkin.top，并且看到由 127.0.0.1:8081 地址提供的内容。
+
+注意：如果你的 HTTP 服务是在一个容器中运行的，需要将容器的端口映射到宿主机上，否则 Caddy 无法访问到容器中的服务。你可以使用 docker run 命令的 -p 参数来映射端口，例如：
+
+Copy
+docker run -p 8081:8081 your-image-name
+这个命令将会将容器的 8081 端口映射到宿主机的 8081 端口上，从而允许 Caddy 访问到容器中的服务。

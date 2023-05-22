@@ -47,24 +47,6 @@ description: Docusaurus 个人博客的性能优化
 
 <br />
 
-| *uikit.min.js* | 体积(kb) | 加载时间(ms) |
-| :-----| :---- | ----: |
-| 默认方式 | 140  | 3270 |
-| Staticfile CDN | 49 | 98 |
-
-![](./img/3-uikit.min.js.png)
-
-<br />
-
-| *uikit-icons.min.js* | 体积(kb) | 加载时间(ms) |
-| :-----| :---- | ----: |
-| 默认方式 | 70.4  | 2760 |
-| Staticfile CDN | 20.4 | 39 |
-
-![](./img/3-uikit-icons.min.js.png)
-
-<br />
-
 | *sweetalert2.min.css* | 体积(kb) | 加载时间(ms) |
 | :-----| :---- | ----: |
 | 默认方式 | 21  | 114 |
@@ -107,17 +89,6 @@ description: Docusaurus 个人博客的性能优化
 ```js title="docusaurus.config.js"
 module.exports = {
   scripts: [
-    // String format.
-    // 'https://docusaurus.io/script.js',
-    // Object format.
-    {
-      src: "https://cdn.staticfile.org/uikit/3.16.17/js/uikit.min.js",
-      async: true,
-    },
-    {
-      src: "https://cdn.staticfile.org/uikit/3.16.17/js/uikit-icons.min.js",
-      async: true,
-    },
     {
       src: "https://cdn.staticfile.org/sweetalert2/11.7.5/sweetalert2.min.js",
       async: true,
@@ -142,7 +113,7 @@ module.exports = {
 
 [Gtmetrix](https://gtmetrix.com/)
 
-![](./img/gtmetrix.png)
+![](./img/gtmetrix-1.png)
 
 <br />
 <br />

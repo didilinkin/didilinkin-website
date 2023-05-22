@@ -1,0 +1,46 @@
+api:
+  dashboard: true
+
+entryPoints:
+  web:
+    address: :80
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+
+  websecure:
+    address: :443
+    http:
+      middlewares:
+        - secureHeaders@file
+      tls:
+        certResolver: le-dns
+        domains:
+          - main: didilinkin.cn
+            sans:
+              - "*.didilinkin.cn"
+
+providers:
+  file:
+    filename: /configurations/dynamic.yml
+
+certificatesResolvers:
+  # 用于指定使用 Let's Encrypt 证书颁发机构进行证书申请和续期
+  # 通配符必须使用 DNS方式
+  le-dns:
+    #  ACME 协议的相关参数，包括 Let's Encrypt 的 API 地址、账户信息等
+    acme:
+      # 与 Let's Encrypt 通信时使用的电子邮件地址，用于接收相关信息和通知
+      email: 929213769@qq.com
+      # ACME 证书存储位置，可以是本地文件系统或者远程存储
+      storage: acme.json
+      # SSL 证书的密钥类型，可以是 RSA、ECDSA 等
+      keyType: EC384
+      # 单域名: 使用 HTTP 验证方式进行证书申请，包括使用的入口点、验证路径等
+      # httpChallenge:
+      #   entryPoint: web
+
+      # 通配符域名: 使用 DNS 验证方式进行证书申请，包括使用的 DNS 服务提供商等
+      dnsChallenge:
+        provider: acme-dns

@@ -1,0 +1,144 @@
+Docker Compose 常用指令
+
+
+```bash
+# 停止运行的服务
+docker-compose down
+
+# 后台重启
+docker-compose up -d
+
+# 全部重启
+docker-compose restart
+
+# 查看指定的日志
+docker-compose logs kong # kong 是服务名称
+
+```
+
+
+
+KONG_SSL_CERT: /etc/kong/ssl/example.crt
+KONG_SSL_CERT_KEY: /etc/kong/ssl/example.key
+
+
+通过 Cerbot 生成 ssl
+
+首先安装 Cerbot
+yum install certbot python3-certbot-nginx
+
+
+
+
+
+使用以下命令使用Certbot生成通配符SSL证书：
+certbot certonly --manual --preferred-challenges=dns -d *.didilinkin.cn
+
+
+
+
+
+
+
+
+
+
+会返回
+
+
+Please deploy a DNS TXT record under the name:
+
+_acme-challenge.didilinkin.cn.
+
+with the following value:
+
+MCXTkqK0ua9CkG_naPw3qIN2PxTKttqAF_ciaJtfciE
+
+Before continuing, verify the TXT record has been deployed. Depending on the DNS
+provider, this may take some time, from a few seconds to multiple minutes. You can
+check if it has finished deploying with aid of online tools, such as the Google
+Admin Toolbox: https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.didilinkin.cn.
+Look for one or more bolded line(s) below the line ';ANSWER'. It should show the
+value(s) you've just added.
+
+Certbot failed to authenticate some domains (authenticator: manual). The Certificate Authority reported these problems:
+  Domain: didilinkin.cn
+  Type:   dns
+  Detail: DNS problem: NXDOMAIN looking up TXT for _acme-challenge.didilinkin.cn - check that a DNS record exists for this domain
+
+Hint: The Certificate Authority failed to verify the manually created DNS TXT records. Ensure that you created these in the correct location, or try waiting longer for DNS propagation on the next attempt.
+
+Some challenges have failed.
+Ask for help or search for solutions at https://community.letsencrypt.org. See the logfile /var/log/letsencrypt/letsencrypt.log or re-run Certbot with -v for more details.
+
+
+
+
+
+
+
+
+需要去 阿里云域名解析那里配置认证
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/didilinkin.cn/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/didilinkin.cn/privkey.pem
+This certificate expires on 2023-08-11.
+These files will be updated when the certificate renews.
+
+NEXT STEPS:
+- This certificate will not be renewed automatically. Autorenewal of --manual certificates requires the use of an authentication hook script (--manual-auth-hook) but one was not provided. To renew this certificate, repeat this same certbot command before the certificate's expiry date.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+If you like Certbot, please consider supporting our work by:
+ * Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+ * Donating to EFF:                    https://eff.org/donate-le
+
+
+
+
+
+
+文件夹内容
+
+lrwxrwxrwx 1 root root  37 May 13 15:40 cert.pem -> ../../archive/didilinkin.cn/cert1.pem
+lrwxrwxrwx 1 root root  38 May 13 15:40 chain.pem -> ../../archive/didilinkin.cn/chain1.pem
+lrwxrwxrwx 1 root root  42 May 13 15:40 fullchain.pem -> ../../archive/didilinkin.cn/fullchain1.pem
+lrwxrwxrwx 1 root root  40 May 13 15:40 privkey.pem -> ../../archive/didilinkin.cn/privkey1.pem
+-rw-r--r-- 1 root root 658 May 13 16:07 README
+
+
+
+pwd: /etc/letsencrypt/live/didilinkin.cn
+
+
+
+
+
+在 docker-compose中 执行查看日志输出
+docker-compose -vv up
+
+
+进入 docker 容器中
+sudo docker exec -it [kong-core] /bin/bash
+
+其中 [kong-core] 是 img的name

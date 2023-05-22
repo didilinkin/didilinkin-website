@@ -1,0 +1,152 @@
+version: '3.9'
+x-kong-config:
+  KONG_DATABASE: '${KONG_DATABASE:-off}'
+  KONG_PG_DATABASE: '${KONG_PG_DATABASE:-kong}'
+  KONG_PG_HOST: db
+  KONG_PG_USER: '${KONG_PG_USER:-kong}'
+  KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
+volumes:
+  kong_data: {}
+  kong_prefix_vol:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  kong_tmp_vol:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+networks:
+  kong-net:
+    external: false
+services:
+  kong-migrations:
+    image: '${KONG_DOCKER_TAG:-kong:latest}'
+    command: kong migrations bootstrap
+    profiles:
+      - database
+    depends_on:
+      - db
+    environment:
+      KONG_DATABASE: '${KONG_DATABASE:-off}'
+      KONG_PG_DATABASE: '${KONG_PG_DATABASE:-kong}'
+      KONG_PG_HOST: db
+      KONG_PG_USER: '${KONG_PG_USER:-kong}'
+      KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
+    secrets:
+      - kong_postgres_password
+    networks:
+      - kong-net
+    restart: on-failure
+  kong-migrations-up:
+    image: '${KONG_DOCKER_TAG:-kong:latest}'
+    command: kong migrations up && kong migrations finish
+    profiles:
+      - database
+    depends_on:
+      - db
+    environment:
+      KONG_DATABASE: '${KONG_DATABASE:-off}'
+      KONG_PG_DATABASE: '${KONG_PG_DATABASE:-kong}'
+      KONG_PG_HOST: db
+      KONG_PG_USER: '${KONG_PG_USER:-kong}'
+      KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
+    secrets:
+      - kong_postgres_password
+    networks:
+      - kong-net
+    restart: on-failure
+  db:
+    image: 'postgres:9.5'
+    profiles:
+      - database
+    environment:
+      POSTGRES_DB: '${KONG_PG_DATABASE:-kong}'
+      POSTGRES_USER: '${KONG_PG_USER:-kong}'
+      POSTGRES_PASSWORD_FILE: /run/secrets/kong_postgres_password
+    secrets:
+      - kong_postgres_password
+    healthcheck:
+      test:
+        - CMD
+        - pg_isready
+        - '-U'
+        - '${KONG_PG_USER:-kong}'
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    restart: on-failure
+    stdin_open: true
+    tty: true
+    networks:
+      - kong-net
+    volumes:
+      - 'kong_data:/var/lib/postgresql/data'
+  kong:
+    image: '${KONG_DOCKER_TAG:-kong:latest}'
+    privileged: true
+    user: '${KONG_USER:-kong}'
+    environment:
+      KONG_DATABASE: '${KONG_DATABASE:-off}'
+      KONG_PG_DATABASE: '${KONG_PG_DATABASE:-kong}'
+      KONG_PG_HOST: db
+      KONG_PG_USER: '${KONG_PG_USER:-kong}'
+      KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_PROXY_LISTEN: '0.0.0.0:8000,0.0.0.0:8443 http2 ssl'
+      KONG_ADMIN_LISTEN: '${KONG_ADMIN_LISTEN:-0.0.0.0:8001}'
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_PREFIX: '${KONG_PREFIX:-/var/run/kong}'
+      KONG_DECLARATIVE_CONFIG: /opt/kong/kong.yaml
+      # KONG_SSL_CERT 环境变量用于指定 SSL 证书文件的路径
+      # KONG_SSL_CERT: /etc/kong/ssl/example.crt
+      KONG_SSL_CERT: /opt/kong/fullchain.pem
+      # KONG_SSL_CERT_KEY 环境变量用于指定 SSL 私钥文件的路径
+      # KONG_SSL_CERT_KEY: /etc/kong/ssl/example.key
+      KONG_SSL_CERT_KEY: /opt/kong/privkey.pem
+      # 自动化SSL插件
+      KONG_PLUGINS: 'bundled,acme'
+      # 配置自动化SSL插件
+      KONG_ACME_STORAGE: kong
+      KONG_ACME_SERVER: 'https://acme-v02.api.letsencrypt.org/directory'
+      KONG_ACME_ACCEPT_TOS: 'true'
+      KONG_ACME_EMAIL: 9292137@qq.com
+      KONG_ACME_DOMAINS: >-
+        didilinkin.cn,www.didilinkin.cn,steam-img.didilinkin.cn,game.didilinkin.cn
+    secrets:
+      - kong_postgres_password
+    # depends_on:
+      # - db
+    networks:
+      - kong-net
+    ports:
+      - '80:8000'
+      - '443:8443'
+      - '127.0.0.1:8001:8001/tcp'
+      - '127.0.0.1:8444:8444/tcp'
+    healthcheck:
+      test:
+        - CMD
+        - kong
+        - health
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    restart: 'on-failure:5'
+    read_only: true
+    volumes:
+      # - 'kong_data:/var/lib/postgresql/data'
+      - 'kong_prefix_vol:${KONG_PREFIX:-/var/run/kong}'
+      - 'kong_tmp_vol:/tmp'
+      - './config:/opt/kong'
+      # 将本地的 /etc/letsencrypt 目录挂载到 Kong API 网关容器中，以便 Kong API 网关可以访问证书文件
+      # /etc/letsencrypt/live/didilinkin.cn 通过软路由到 ./ssl文件中
+      # - './ssl:/etc/kong/ssl:ro'
+      # 挪到 ./config文件夹
+      # './config:/opt/kong'
+    security_opt:
+      - no-new-privileges
+secrets:
+  kong_postgres_password:
+    file: ./POSTGRES_PASSWORD
