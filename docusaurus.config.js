@@ -228,15 +228,6 @@ const config = {
               },
             ],
           },
-          // {
-          //   title: 'Community',
-          //   items: [
-          //     {
-          //       label: 'Stack Overflow',
-          //       href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-          //     },
-          //   ],
-          // },
           {
             title: "More",
             items: [
@@ -246,6 +237,23 @@ const config = {
               {
                 label: "GitHub",
                 href: "https://github.com/didilinkin",
+              },
+            ],
+          },
+          {
+            title: "Entrance",
+            items: [
+              {
+                label: "Traefik Dashboard",
+                href: "https://dash.didilinkin.cn/",
+              },
+              {
+                label: "Prometheus",
+                href: "https://prometheus.didilinkin.cn/",
+              },
+              {
+                label: "Grafana",
+                href: "https://grafana.didilinkin.cn/",
               },
             ],
           },

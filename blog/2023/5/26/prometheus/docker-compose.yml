@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.30.3
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-lifecycle'
+    ports:
+      - '9090:9090'
+    networks:
+      - proxy
+
+  alertmanager:
+    image: prom/alertmanager:v0.23.0
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/config.yml
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+    ports:
+      - '9093:9093'
+    networks:
+      - proxy
+
+  grafana:
+    image: grafana/grafana:8.1.5
+    ports:
+      - '3000:3000'
+    networks:
+      - proxy
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+
+networks:
+  proxy:
+    external: true

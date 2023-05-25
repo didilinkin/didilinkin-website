@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'node_exporter'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:8082']
+
+# 这里的配置中，global 部分用于设置全局参数，例如抓取间隔和评估间隔等
+# scrape_configs 部分用于设置抓取目标
+# 其中 job_name 属性用于定义抓取任务的名称，targets 属性用于定义抓取目标的地址和端口号
+
+
+# 这个配置文件仅定义了一个抓取目标，即本机上的 node_exporter 实例
+# Prometheus 将每隔 5 秒抓取一次 node_exporter 的指标，并保存到内部存储中
+# 在浏览器中访问 http://localhost:8082, 即可看到 Prometheus 的 Web 界面，并在其中查看抓取目标的状态和指标
+
+# 需要注意的是，这个配置文件仅供参考，具体可以根据实际情况进行调整和定制
+# 例如，可以添加更多的抓取目标和配置参数，修改抓取间隔和评估间隔等
+# 另外，还需要根据实际情况配置防火墙、权限、认证等安全问题，以确保 Prometheus 的安全运行

@@ -1,5 +1,6 @@
 api:
   dashboard: true
+  debug: true
 
 entryPoints:
   web:
@@ -20,6 +21,57 @@ entryPoints:
           - main: didilinkin.cn
             sans:
               - "*.didilinkin.cn"
+
+  # METRICS 功能用于收集和展示应用程序的指标数据
+  # 例如请求总数、请求成功率、请求响应时间、请求吞吐量等信息，方便用户进行应用程序的监控和分析
+  #
+  # Traefik 支持多种格式的 METRICS
+  # 例如 Prometheus、Datadog、StatsD 等
+  # 用户可以根据需要选择适合自己的格式和工具，并进行相应的配置和启用
+  metrics:
+    address: :8082
+
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addrouterslabels: true
+    addServicesLabels: true
+    entryPoint: metrics
+    manualrouting: true
+
+
+
+# ACCESSLOG 功能用于记录请求的详细信息
+# 包括请求方法、URL、响应状态码、响应时间、客户端 IP、用户代理等信息，方便用户进行访问日志的分析和审计
+# Traefik 支持多种格式的 ACCESSLOG，例如 Apache、JSON、CSV 等
+# 用户可以根据需要选择适合自己的格式和工具，并进行相应的配置和启用
+# accessLog:
+#   filePath: /data/basic/traefik/logs/access.log
+#   bufferingSize: 100
+# --log.filePath=/path/to/traefik.log #可以创建数据卷把这个路径给挂载出去
+# --log.level=DEBUG # DEBUG, PANIC, FATAL, ERROR, WARN, INFO
+
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: true
+
+accessLog:
+  filePath: /logs/traefik_access.log
+  format: json
+  fields:
+    defaultmode: keep
+    names:
+      ClientUsername: drop
+    headers:
+      defaultmode: keep
+      names:
+        User-Agent: redact
+        Authorization: drop
+        Content-Type: keep
+
+log:
+  level: DEBUG
+  filePath: /logs/traefik.log
 
 providers:
   file:

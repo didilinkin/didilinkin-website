@@ -1,0 +1,43 @@
+# 这里的配置中，global 部分用于设置全局参数，例如告警解决的超时时间
+global:
+  resolve_timeout: 5m
+
+# route 部分用于设置告警路由
+# 例如按照告警名称分组、
+# 等待 30 秒后再次发送告警
+# 每隔 5 分钟进行一次分组
+# 每隔 4 小时重复发送告警等
+route:
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: 'email'
+
+# receivers 部分用于设置告警接收器，例如将告警发送到本地的控制台
+receivers:
+  - name: 'email'
+    email_configs:
+      - from: 'hasyken@qq.com'  # smtp_username
+        to: '929213769@qq.com'  # admin_email
+        smarthost: 'smtp.qq.com:587'
+        auth_username: 'hasyken@qq.com'
+        auth_password: 'mhdgrusvoktbjjci'
+        starttls_policy: 'mayskip'
+        headers:
+          Subject: '{{ template "email.default.subject" . }}'
+
+
+# 这个配置文件仅定义了一个告警接收器，即将告警发送到本地的控制台
+# 当 Alertmanager 收到告警时，将打印告警信息到控制台中
+# 如果需要将告警发送到其他地方，例如邮件、Slack 等，可以根据实际情况添加相应的接收器和配置参数
+
+# 需要注意的是，这个配置文件仅供参考，具体可以根据实际情况进行调整和定制
+# 例如，可以添加更多的告警接收器和配置参数，修改告警路由和发送间隔等
+# 另外，还需要根据实际情况配置防火墙、权限、认证等安全问题，以确保 Alertmanager 的安全运行
+
+# 这里的配置中，receivers 部分新增了一个名为 email 的邮件接收器，并设置了邮件的收件人、发件人、SMTP 服务器地址、认证用户名和密码等参数
+# 默认使用 STARTTLS 加密方式发送邮件，可以通过 starttls_policy 参数来控制是否需要强制使用 STARTTLS 加密，或者设置为 never 来禁用加密
+
+# 在配置完成后，需要重启 Alertmanager 服务，以使配置生效
+# 当 Alertmanager 收到告警时，将会发送邮件到指定的邮件地址

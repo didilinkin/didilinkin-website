@@ -6,22 +6,38 @@ http:
       service: kong-service
       middlewares:
       rule: "Host(`didilinkin.cn`)"
+
     # Traefik 控制面板
     dashboard:
       service: api@internal
       middlewares:
         - "user-auth"
       rule: "Host(`dash.didilinkin.cn`)"
-    # Kong
+
+    # Kong 界面
     kong:
       service: kong-service
       middlewares:
       rule: "Host(`kong.didilinkin.cn`)"
 
     # Proxy
-    proxy:
-      service: proxy-service
-      rule: "Host(`clashx.didilinkin.cn`)"
+    # proxy:
+    #   service: proxy-service
+    #   rule: "Host(`clashx.didilinkin.cn`)"
+
+    # Prometheus Web 界面
+    prometheus:
+      service: prometheus-service
+      middlewares:
+        - "user-auth"
+      rule: "Host(`prometheus.didilinkin.cn`)"
+
+
+    # Grafana Web 界面
+    grafana:
+      service: grafana-service
+      middlewares:
+      rule: "Host(`grafana.didilinkin.cn`)"
 
   middlewares:
     secureHeaders:
@@ -32,12 +48,11 @@ http:
         stsPreload: true
         stsSeconds: 31536000
 
-    # UserName : admin -> didilinkin
-    # Password : qwer1234 -> 三级密码～
+    # UserName : didilinkin
+    # Password : 三级～
     user-auth:
       basicAuth:
         users:
-          # - "admin:$apr1$tm53ra6x$FntXd6jcvxYM/YH0P2hcc1"
           - "didilinkin:$2y$10$DTvlzREp79mOVoHTn2EJxeISCPoaQIpAoQ.IXMCJ9Xt9rs4MemSVm"
 
   services:
@@ -46,6 +61,16 @@ http:
         servers:
           # 需要 docker安装 kong 后, 找 这俩的IP替换下面的 [ip-address-of-kong]
           - url: "http://172.18.0.3:8000"
+
+    prometheus-service:
+      loadBalancer:
+        servers:
+          - url: "http://172.18.0.5:9090"
+
+    grafana-service:
+      loadBalancer:
+        servers:
+          - url: "http://172.18.0.7:3000"
 
     # ClashX 配置转发 - 会报错
     # proxy-service:

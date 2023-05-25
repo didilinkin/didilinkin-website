@@ -15,7 +15,7 @@ docker run -d -p 80:80 -v /path/to/your/static/files:/usr/share/nginx/html --nam
 
 
 
-2. 在 Kong 中创建一个 Service 对象，该对象将代理到本地的 Nginx 容器。
+2. 在 Kong 中创建一个 Service 对象，该对象将代理到本地的 Nginx 容器
 
 例如，可以使用以下命令：
 
@@ -115,6 +115,7 @@ curl -i -X DELETE http://localhost:8001/routes/
 
 
 其中，{route_id} 是要删除的 Route 对象的 ID。你需要使用上一个命令中列出的 ID 来替换 {route_id}。
+
 当你删除所有与 Service 对象相关联的 Route 对象后，你可以再次运行删除 Service 对象的命令：
 
 curl -i -X DELETE --url http://localhost:8001/services/my-blog-service
@@ -144,42 +145,15 @@ Copy
 curl -i http://localhost:8001/services/{service_id}/routes
 
 
-将 {service_id} 替换为实际的服务 ID，这将返回一个 JSON 格式的路由器列表，其中包含与该服务关联的所有路由器的详细信息，包括路由器 ID、名称、路径和其他属性。
+将 {service_id} 替换为实际的服务 ID，这将返回一个 JSON 格式的路由器列表，其中包含与该服务关联的所有路由器的详细信息，包括路由器 ID、名称、路径和其他属性
 
-需要注意的是，如果 Kong 已经配置了多个上游服务和路由器，则服务和路由器的数量可能会非常大。在这种情况下，你可能需要使用过滤器或其他查询参数来缩小结果集，以便更轻松地查看和管理配置。
+需要注意的是，如果 Kong 已经配置了多个上游服务和路由器，则服务和路由器的数量可能会非常大
 
-此外，你也可以使用 Kong 的 Dashboard 来查看和管理 Kong 的配置。Dashboard 是一个基于 Web 的界面，提供了一个直观的界面来查看和管理 Kong 的服务、路由器、插件和其他配置。你可以通过访问 http://localhost:8002 来访问 Dashboard，前提是已经配置了 Kong 的管理 API 和 Dashboard。
-
-
-
-
-
+在这种情况下，你可能需要使用过滤器或其他查询参数来缩小结果集，以便更轻松地查看和管理配置
 
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-在 Kong 中开启 Gzip 和 Brotli 压缩。你可以使用 Kong 的插件来开启 Gzip 和 Brotli 压缩
-
-在 Kong 2.0 中，你可以使用以下命令来配置 Gzip 和 Brotli 压缩
-
-```bash
-curl -X POST http://localhost:8001/plugins/ \
-    --data "name=gzip" \
-    --data "config.produce_gzip=true" \
-    --data "config.produce_brotli=true" \
-    --data "config.gzip_types=text/html,text/css,application/javascript,application/json" \
-    --data "config.brotli_types=text/html,text/css,application/javascript,application/json"
-
-```
-
-在这个示例中，我们添加了名为 gzip 的插件，并使用 config.produce_gzip 和 config.produce_brotli 命令来开启 Gzip 和 Brotli 压缩
-我们还使用 config.gzip_types 和 config.brotli_types 命令来指定需要进行 Gzip 和 Brotli 压缩的 MIME 类型
-
-
-
-
 
 
 

@@ -1,0 +1,129 @@
+---
+sidebar_position: 2
+sidebar_label: Kong API
+description: Kong API
+title: Kong API
+---
+
+<br />
+
+## 绑定服务
+
+### 1. 创建 Service对象
+
+在 Kong 中创建一个 Service 对象，该对象将代理到本地的 Nginx 容器
+
+```bash
+curl -i -X POST \
+  --url http://localhost:8001/services/ \
+  --data 'name={service_id}' \
+  --data 'url=http://{container_id}'
+
+# {service_id} 假设为: my-blog-service
+# {container_id} 假设为: my-blog-container
+curl -i -X POST \
+  --url http://localhost:8001/services/ \
+  --data 'name=my-blog-service' \
+  --data 'url=http://my-blog-container'
+
+# 将创建一个名为 `my-blog-service` 的 Service 对象，并将其代理到名为 `my-blog-container` 的容器中的 Nginx 服务
+```
+
+<br />
+
+### 2. 创建 Route对象
+
+创建一个 Route 对象，将 Service 对象映射到一个路径
+
+```bash
+# 防止刷新页面 url改变
+# 将 strip_path 参数设置为 false，这样 Kong 将不会去掉请求路径中的前缀
+#
+# 将 preserve_host 参数设置为 true，这样 Kong 将保留原始请求的主机名; 通常用于防止 URL 刷新丢失
+
+curl -i -X POST \
+  --url http://localhost:8001/services/my-blog-service/routes \
+  --data 'hosts[]={yourdomain}' \
+  --data 'paths[]=/' \
+  --data 'strip_path=false' \
+  --data 'preserve_host=true'
+
+# {service_id} 假设为: my-blog-service
+# {yourdomain} 假设为: didilinkin.cn
+curl -i -X POST \
+  --url http://localhost:8001/services/my-blog-service/routes \
+  --data 'hosts[]=didilinkin.cn' \
+  --data 'paths[]=/' \
+  --data 'strip_path=false' \
+  --data 'preserve_host=true'
+
+# 这个命令将创建一个名为 `didilinkin.cn` 的 Route 对象，并将其映射到根路径 `/`
+# 这意味着当你访问 `http://didilinkin.cn/` 时，Kong 将代理到本地的 Nginx 容器中的静态网站文件夹
+```
+
+<br />
+<br />
+<br />
+
+## 删除服务
+
+### 1. 查看关联
+
+```bash
+# 如果你要删除一个 Service 对象，你需要先删除与它相关联的所有 Route 对象
+# 你可以使用以下命令来列出与 Service 对象相关联的所有 Route 对象
+
+curl -sS http://localhost:8001/services/{service_id}/routes | jq '.data[] | {id: .id, name: .name}'
+
+# {service_id} 假设为: my-blog-service
+curl -sS http://localhost:8001/services/my-blog-service/routes | jq '.data[] | {id: .id, name: .name}'
+
+# 这个命令使用 curl 发送一个 GET 请求，获取名为 my-blog-service 的 Service 对象的所有 Route 对象，并使用 jq 工具以格式化输出
+# 输出将列出每个 Route 对象的 ID 和名称
+```
+
+<br />
+
+### 2. 删除 Route 对象
+```bash
+# 其中，{route_id} 是要删除的 Route 对象的 ID
+curl -i -X DELETE http://localhost:8001/routes/{route_id}
+```
+
+<br />
+
+### 3. 删除 Service 对象
+```bash
+curl -i -X DELETE --url http://localhost:8001/services/{service_id}
+
+# {service_id} 假设为: my-blog-service
+curl -i -X DELETE --url http://localhost:8001/services/my-blog-service
+```
+
+<br />
+<br />
+<br />
+
+## 查看
+
+### 查看 Kong已配置的所有 Router 和 Service
+
+```bash
+# 这将返回一个 JSON 格式的服务列表
+# 其中包含已配置的所有服务的详细信息，包括服务 ID、名称、URL 和其他属性
+
+curl -i http://localhost:8001/services/
+```
+
+<br />
+
+### 根据 Service ID 获取与该服务关联的所有路由器列表
+
+```bash
+# 将 {service_id} 替换为实际的服务 ID，这将返回一个 JSON 格式的路由器列表
+# 其中包含与该服务关联的所有路由器的详细信息，包括路由器 ID、名称、路径和其他属性
+
+curl -i http://localhost:8001/services/{service_id}/routes
+```
+
+<br />
