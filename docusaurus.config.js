@@ -247,14 +247,14 @@ const config = {
                 label: "Traefik Dashboard",
                 href: "https://dash.didilinkin.cn/",
               },
-              {
-                label: "Prometheus",
-                href: "https://prometheus.didilinkin.cn/",
-              },
-              {
-                label: "Grafana",
-                href: "https://grafana.didilinkin.cn/",
-              },
+              // {
+              //   label: "Prometheus",
+              //   href: "https://prometheus.didilinkin.cn/",
+              // },
+              // {
+              //   label: "Grafana",
+              //   href: "https://grafana.didilinkin.cn/",
+              // },
             ],
           },
         ],

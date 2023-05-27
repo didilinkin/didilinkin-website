@@ -18,7 +18,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: on-failure
+    restart: always
 
   #######################################
   # Kong database migration
@@ -57,7 +57,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 10
-    restart: on-failure
+    restart: always
 
 networks:
   proxy:

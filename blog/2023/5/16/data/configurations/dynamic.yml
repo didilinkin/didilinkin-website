@@ -26,18 +26,18 @@ http:
     #   rule: "Host(`clashx.didilinkin.cn`)"
 
     # Prometheus Web 界面
-    prometheus:
-      service: prometheus-service
-      middlewares:
-        - "user-auth"
-      rule: "Host(`prometheus.didilinkin.cn`)"
+    # prometheus:
+    #   service: prometheus-service
+    #   middlewares:
+    #     - "user-auth"
+    #   rule: "Host(`prometheus.didilinkin.cn`)"
 
 
     # Grafana Web 界面
-    grafana:
-      service: grafana-service
-      middlewares:
-      rule: "Host(`grafana.didilinkin.cn`)"
+    # grafana:
+    #   service: grafana-service
+    #   middlewares:
+    #   rule: "Host(`grafana.didilinkin.cn`)"
 
   middlewares:
     secureHeaders:
@@ -60,17 +60,17 @@ http:
       loadBalancer:
         servers:
           # 需要 docker安装 kong 后, 找 这俩的IP替换下面的 [ip-address-of-kong]
-          - url: "http://172.18.0.3:8000"
+          - url: "http://172.18.0.4:8000"
 
-    prometheus-service:
-      loadBalancer:
-        servers:
-          - url: "http://172.18.0.5:9090"
+    # prometheus-service:
+    #   loadBalancer:
+    #     servers:
+    #       - url: "http://172.18.0.5:9090"
 
-    grafana-service:
-      loadBalancer:
-        servers:
-          - url: "http://172.18.0.7:3000"
+    # grafana-service:
+    #   loadBalancer:
+    #     servers:
+    #       - url: "http://172.18.0.7:3000"
 
     # ClashX 配置转发 - 会报错
     # proxy-service:
