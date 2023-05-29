@@ -302,7 +302,7 @@ const config = {
 
   scripts: [
     // "https://cdn-go.cn/aegis/aegis-sdk/latest/aegis.min.js",
-    // "/aegis/init-script.js",
+    "/baidu-analytics/analytics.js",
     {
       src: "https://cdn.staticfile.org/sweetalert2/11.7.5/sweetalert2.min.js",
       defer: true,
