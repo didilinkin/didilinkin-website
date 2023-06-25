@@ -83,6 +83,10 @@ $ GIT_USER=<Your GitHub username> yarn deploy
     # 由文档使用，用于指定侧边栏中的文档顺序
 ```
 
+### 国外参考博客
+
+* [viget](https://www.viget.com/)
+* [Maxim Orlov](https://maximorlov.com/)
 
 ### TODO
 
