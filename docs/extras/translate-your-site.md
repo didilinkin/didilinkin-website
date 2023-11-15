@@ -43,7 +43,7 @@ npm run start -- --locale fr
   Your localized site is accessible at [http://localhost:3000/fr/](http://localhost:3000/fr/) and the `Getting Started` page is translated.
 -->
 
-您的本地化站点可在 [http://localhost:3000/fr/](http://localhost:3000/fr/) 访问 “入门”页面已翻译
+您的本地化站点可在 [http://localhost:3000/fr/](/) 访问 “入门”页面已翻译
 
 :::caution
 
