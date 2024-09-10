@@ -1,4 +1,4 @@
-我已在docker中部署了 kong， 如何让它将didilinkin.cn:80端口绑定到 一个本地的静态网站文件夹内呢
+我已在docker中部署了 kong， 如何让它将didilinkin.cn:80端口绑定到 一个本地的静态网站文件夹内
 
 1. 在 Docker 中运行一个 Nginx 容器的静态站
 ```bash

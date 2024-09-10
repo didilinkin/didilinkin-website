@@ -3,5 +3,6 @@
   "github-actions.remote-name": "origin",
   "github-actions.workflows.pinned.workflows": [],
   "CodeGPT.organizationId": "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",
-  "CodeGPT.query.language": "Chinese"
+  "CodeGPT.query.language": "Chinese",
+  "Codegeex.CompletionDelay": 1
 }
